@@ -53,7 +53,7 @@
     @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium;
   }
   .badge-purple {
-    @apply badge bg-primary-900/50 text-primary-300 border border-primary-800/50;
+    @apply badge bg-primary-900/50 text-primary-400 border border-primary-800/50;
   }
   .badge-green {
     @apply badge bg-green-900/40 text-green-400 border border-green-800/40;
