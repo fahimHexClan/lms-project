@@ -1,0 +1,8 @@
+{
+  "testEnvironment": "jsdom",
+  "setupFilesAfterFramework": ["@testing-library/jest-dom"],
+  "transform": {},
+  "moduleNameMapper": {
+    "\\.(css|less|scss)$": "<rootDir>/__mocks__/styleMock.js"
+  }
+}
