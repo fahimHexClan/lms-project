@@ -6,12 +6,12 @@ import { PageLayout } from '../../components/common/Sidebar'
 import ActiveChallenges from '../../components/bage/ActiveChallenges'
 import Leaderboard from '../../components/bage/Leaderboard'
 
-function StatCard({ label, value, sub, color = 'text-primary-400' }) {
+function StatCard({ label, value, sub, color = 'text-primary-700' }) {
   return (
     <div className="card-sm">
-      <p className="text-xs text-gray-500 mb-1">{label}</p>
+      <p className="text-xs text-slate-500 mb-1">{label}</p>
       <p className={`text-2xl font-display font-700 ${color}`}>{value}</p>
-      {sub && <p className="text-xs text-gray-600 mt-0.5">{sub}</p>}
+      {sub && <p className="text-xs text-slate-500 mt-0.5">{sub}</p>}
     </div>
   )
 }
@@ -60,10 +60,10 @@ export default function StudentDashboard() {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="font-display text-3xl font-700 text-white">
+          <h1 className="font-display text-3xl font-700 text-slate-900">
             Welcome back, {profile?.displayName?.split(' ')[0] || 'Student'} 👋
           </h1>
-          <p className="text-gray-500 mt-1">Here's your learning overview for today.</p>
+          <p className="text-slate-500 mt-1">Here's your learning overview for today.</p>
         </div>
 
         {/* Stats row */}
@@ -72,25 +72,25 @@ export default function StudentDashboard() {
             label="Total Points"
             value={(profile?.points || 0).toLocaleString()}
             sub="Keep earning!"
-            color="text-accent-400"
+            color="text-accent-700"
           />
           <StatCard
             label="Login Streak"
             value={streakEmoji(profile?.loginStreak || 0)}
             sub={`${profile?.loginStreak || 0} days`}
-            color="text-orange-400"
+            color="text-orange-600"
           />
           <StatCard
             label="Badges Earned"
             value={profile?.badges?.length || 0}
             sub="Achievements"
-            color="text-yellow-400"
+            color="text-accent-700"
           />
           <StatCard
             label="Pending"
             value={pendingCount}
             sub="assignments due"
-            color={pendingCount > 0 ? 'text-red-400' : 'text-green-400'}
+            color={pendingCount > 0 ? 'text-red-600' : 'text-emerald-700'}
           />
         </div>
 
@@ -104,24 +104,24 @@ export default function StudentDashboard() {
           {/* Upcoming assignments */}
           <div className="lg:col-span-2 card">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-display text-white font-700">Upcoming Assignments</h3>
-              <a href="/student/assignments" className="text-xs text-primary-400 hover:text-primary-300">View all →</a>
+              <h3 className="font-display text-slate-900 font-700">Upcoming Assignments</h3>
+              <a href="/student/assignments" className="text-xs text-primary-700 hover:text-primary-300">View all →</a>
             </div>
             {recentAssignments.length === 0 ? (
-              <p className="text-gray-600 text-sm text-center py-6">No upcoming assignments</p>
+              <p className="text-slate-500 text-sm text-center py-6">No upcoming assignments</p>
             ) : (
               <div className="space-y-2">
                 {recentAssignments.map(a => {
                   const deadline = a.deadline?.toDate?.() || new Date(a.deadline)
                   const isNear = (deadline - Date.now()) < 2 * 24 * 60 * 60 * 1000
                   return (
-                    <div key={a.id} className="flex items-center gap-3 p-3 rounded-xl bg-gray-800/50 hover:bg-gray-800 transition-colors">
+                    <div key={a.id} className="flex items-center gap-3 p-3 rounded-xl bg-slate-100 hover:bg-slate-100 transition-colors">
                       <div className={`w-2 h-2 rounded-full flex-shrink-0 ${isNear ? 'bg-red-500' : 'bg-green-500'}`} />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-200 truncate">{a.title}</p>
-                        <p className="text-xs text-gray-500">{a.module}</p>
+                        <p className="text-sm font-medium text-slate-700 truncate">{a.title}</p>
+                        <p className="text-xs text-slate-500">{a.module}</p>
                       </div>
-                      <span className={`text-xs flex-shrink-0 ${isNear ? 'text-red-400' : 'text-gray-500'}`}>
+                      <span className={`text-xs flex-shrink-0 ${isNear ? 'text-red-600' : 'text-slate-500'}`}>
                         {deadline.toLocaleDateString()}
                       </span>
                     </div>

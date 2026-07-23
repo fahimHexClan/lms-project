@@ -27,8 +27,8 @@ export default function StudentContent() {
     <PageLayout>
       <div className="max-w-5xl mx-auto">
         <div className="mb-8">
-          <h1 className="font-display text-3xl font-700 text-white">Content Library</h1>
-          <p className="text-gray-500 mt-1">Access all your lecture materials and resources.</p>
+          <h1 className="font-display text-3xl font-700 text-slate-900">Content Library</h1>
+          <p className="text-slate-500 mt-1">Access all your lecture materials and resources.</p>
         </div>
 
         <div className="mb-6">
@@ -45,7 +45,7 @@ export default function StudentContent() {
             <div className="animate-spin h-8 w-8 border-2 border-primary-500 border-t-transparent rounded-full" />
           </div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-20 text-gray-600">
+          <div className="text-center py-20 text-slate-500">
             <p className="text-4xl mb-3">📂</p>
             <p>No materials found</p>
           </div>
@@ -73,19 +73,19 @@ function MaterialCard({ material: m }) {
   }
 
   return (
-    <div className="card hover:border-gray-700 transition-colors group">
+    <div className="card hover:border-slate-300 transition-colors group">
       <div className="flex items-start justify-between gap-2 mb-3">
-        <div className="w-10 h-10 rounded-xl bg-primary-900/40 border border-primary-800/30 flex items-center justify-center flex-shrink-0">
+        <div className="w-10 h-10 rounded-xl bg-primary-50 border border-primary-200 flex items-center justify-center flex-shrink-0">
           <span className="text-lg">{isPDF ? '📄' : '📊'}</span>
         </div>
         <span className="badge badge-blue">{m.module || 'General'}</span>
       </div>
-      <h3 className="font-medium text-gray-200 text-sm mb-1 line-clamp-2">{m.title}</h3>
+      <h3 className="font-medium text-slate-700 text-sm mb-1 line-clamp-2">{m.title}</h3>
       {m.description && (
-        <p className="text-xs text-gray-500 mb-3 line-clamp-2">{m.description}</p>
+        <p className="text-xs text-slate-500 mb-3 line-clamp-2">{m.description}</p>
       )}
-      <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-800">
-        <span className="text-xs text-gray-600">
+      <div className="flex items-center justify-between mt-4 pt-3 border-t border-slate-200">
+        <span className="text-xs text-slate-500">
           {m.uploadedAt?.toDate?.().toLocaleDateString() || '—'}
         </span>
         <button onClick={handleDownload} className="btn-primary text-xs px-3 py-1.5">

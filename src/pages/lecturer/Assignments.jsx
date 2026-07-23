@@ -83,8 +83,8 @@ export default function LecturerAssignments() {
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="font-display text-3xl font-700 text-white">Assignments</h1>
-            <p className="text-gray-500 mt-1">Create assignments and grade student submissions.</p>
+            <h1 className="font-display text-3xl font-700 text-slate-900">Assignments</h1>
+            <p className="text-slate-500 mt-1">Create assignments and grade student submissions.</p>
           </div>
           <button onClick={() => setShowForm(f => !f)} className="btn-primary">+ New Assignment</button>
         </div>
@@ -92,7 +92,7 @@ export default function LecturerAssignments() {
         {/* Create form */}
         {showForm && (
           <form onSubmit={createAssignment} className="card mb-6 animate-slide-up">
-            <h3 className="font-medium text-white mb-4">Create new assignment</h3>
+            <h3 className="font-medium text-slate-900 mb-4">Create new assignment</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
                 <label className="label">Title *</label>
@@ -142,18 +142,18 @@ export default function LecturerAssignments() {
                   className={`w-full text-left p-4 rounded-xl border transition-all
                     ${selected === a.id
                       ? 'border-primary-700 bg-primary-900/20'
-                      : 'border-gray-800 bg-gray-900 hover:border-gray-700'}`}
+                      : 'border-slate-200 bg-white hover:border-slate-300'}`}
                 >
-                  <p className="text-sm font-medium text-gray-200 mb-1">{a.title}</p>
-                  <p className="text-xs text-gray-500">{a.module} • {a.marks} marks</p>
-                  <p className={`text-xs mt-1 ${isPast ? 'text-red-400' : 'text-gray-500'}`}>
+                  <p className="text-sm font-medium text-slate-700 mb-1">{a.title}</p>
+                  <p className="text-xs text-slate-500">{a.module} • {a.marks} marks</p>
+                  <p className={`text-xs mt-1 ${isPast ? 'text-red-600' : 'text-slate-500'}`}>
                     {isPast ? '⏰ Closed' : '🟢 Open'} · {deadline.toLocaleDateString()}
                   </p>
                 </button>
               )
             })}
             {assignments.length === 0 && (
-              <div className="text-center py-12 text-gray-600">
+              <div className="text-center py-12 text-slate-500">
                 <p className="text-3xl mb-2">📋</p>
                 <p className="text-sm">No assignments yet</p>
               </div>
@@ -164,34 +164,34 @@ export default function LecturerAssignments() {
           <div className="lg:col-span-3">
             {selected ? (
               <div className="card">
-                <h3 className="font-display text-white font-700 mb-1">{selectedAssignment?.title}</h3>
-                <p className="text-sm text-gray-500 mb-4">
+                <h3 className="font-display text-slate-900 font-700 mb-1">{selectedAssignment?.title}</h3>
+                <p className="text-sm text-slate-500 mb-4">
                   {submissions.length} submission{submissions.length !== 1 ? 's' : ''} •
                   {' '}{submissions.filter(s => s.grade !== null).length} graded
                 </p>
 
                 {submissions.length === 0 ? (
-                  <p className="text-gray-600 text-sm text-center py-8">No submissions yet</p>
+                  <p className="text-slate-500 text-sm text-center py-8">No submissions yet</p>
                 ) : (
                   <div className="space-y-4">
                     {submissions.map(sub => (
-                      <div key={sub.id} className="border border-gray-800 rounded-xl p-4 bg-gray-800/30">
+                      <div key={sub.id} className="border border-slate-200 rounded-xl p-4 bg-slate-100/30">
                         <div className="flex items-center justify-between mb-3">
                           <div>
-                            <p className="text-sm text-gray-300">{sub.studentId?.slice(0, 12)}…</p>
+                            <p className="text-sm text-slate-600">{sub.studentId?.slice(0, 12)}…</p>
                             <div className="flex items-center gap-2 mt-1">
                               <span className={`badge ${sub.isOnTime ? 'badge-green' : 'badge-amber'}`}>
                                 {sub.isOnTime ? '✓ On time' : '⚠ Late'}
                               </span>
                               <a href={sub.fileUrl} target="_blank" rel="noreferrer"
-                                className="text-xs text-primary-400 hover:text-primary-300">
+                                className="text-xs text-primary-700 hover:text-primary-300">
                                 📎 {sub.fileName}
                               </a>
                             </div>
                           </div>
                           {sub.grade !== null && (
                             <div className="text-right">
-                              <p className="font-display font-700 text-accent-400 text-xl">
+                              <p className="font-display font-700 text-accent-700 text-xl">
                                 {sub.grade}/{selectedAssignment?.marks}
                               </p>
                             </div>
@@ -199,8 +199,8 @@ export default function LecturerAssignments() {
                         </div>
 
                         {sub.grade !== null ? (
-                          <div className="bg-gray-900/50 rounded-lg p-2 text-xs text-gray-400">
-                            <span className="text-gray-600">Feedback: </span>{sub.feedback || 'No feedback provided'}
+                          <div className="bg-slate-100 rounded-lg p-2 text-xs text-slate-500">
+                            <span className="text-slate-500">Feedback: </span>{sub.feedback || 'No feedback provided'}
                           </div>
                         ) : (
                           <div className="space-y-2">
@@ -239,7 +239,7 @@ export default function LecturerAssignments() {
               </div>
             ) : (
               <div className="card flex items-center justify-center min-h-[300px]">
-                <div className="text-center text-gray-600">
+                <div className="text-center text-slate-500">
                   <p className="text-4xl mb-3">📋</p>
                   <p>Select an assignment to view submissions</p>
                 </div>

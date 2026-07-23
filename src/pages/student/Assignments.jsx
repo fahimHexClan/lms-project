@@ -90,8 +90,8 @@ export default function StudentAssignments() {
     <PageLayout>
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
-          <h1 className="font-display text-3xl font-700 text-white">Assignments</h1>
-          <p className="text-gray-500 mt-1">Submit your coursework and view feedback.</p>
+          <h1 className="font-display text-3xl font-700 text-slate-900">Assignments</h1>
+          <p className="text-slate-500 mt-1">Submit your coursework and view feedback.</p>
         </div>
 
         <div className="space-y-4">
@@ -115,7 +115,7 @@ export default function StudentAssignments() {
             )
           })}
           {assignments.length === 0 && (
-            <div className="text-center py-20 text-gray-600">
+            <div className="text-center py-20 text-slate-500">
               <p className="text-4xl mb-3">📋</p>
               <p>No assignments yet</p>
             </div>
@@ -134,7 +134,7 @@ function AssignmentCard({ assignment: a, submission, deadline, isPast, isNear, u
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
-            <h3 className="font-medium text-white">{a.title}</h3>
+            <h3 className="font-medium text-slate-900">{a.title}</h3>
             {submission && (
               <span className={`badge ${submission.isOnTime ? 'badge-green' : 'badge-amber'}`}>
                 {submission.isOnTime ? '✓ On time' : '⚠ Late'}
@@ -143,34 +143,34 @@ function AssignmentCard({ assignment: a, submission, deadline, isPast, isNear, u
             {!submission && isPast && <span className="badge badge-red">❌ Missed</span>}
             {!submission && isNear && <span className="badge badge-amber">⏰ Due soon</span>}
           </div>
-          <p className="text-sm text-gray-500 mb-1">{a.module} • {a.marks} marks</p>
-          <p className="text-sm text-gray-400">{a.description}</p>
+          <p className="text-sm text-slate-500 mb-1">{a.module} • {a.marks} marks</p>
+          <p className="text-sm text-slate-500">{a.description}</p>
         </div>
         <div className="text-right flex-shrink-0">
-          <p className="text-xs text-gray-500">Deadline</p>
-          <p className={`text-sm font-medium ${isPast ? 'text-red-400' : isNear ? 'text-amber-400' : 'text-gray-300'}`}>
+          <p className="text-xs text-slate-500">Deadline</p>
+          <p className={`text-sm font-medium ${isPast ? 'text-red-600' : isNear ? 'text-accent-700' : 'text-slate-600'}`}>
             {deadline.toLocaleDateString()}
           </p>
         </div>
       </div>
 
       {/* Submission area */}
-      <div className="mt-4 pt-4 border-t border-gray-800">
+      <div className="mt-4 pt-4 border-t border-slate-200">
         {submission ? (
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-gray-500 mb-1">Your submission</p>
+              <p className="text-xs text-slate-500 mb-1">Your submission</p>
               <a href={submission.fileUrl} target="_blank" rel="noreferrer"
-                className="text-sm text-primary-400 hover:text-primary-300 underline underline-offset-2">
+                className="text-sm text-primary-700 hover:text-primary-300 underline underline-offset-2">
                 {submission.fileName}
               </a>
             </div>
             {submission.grade !== null ? (
               <div className="text-right">
-                <p className="text-xs text-gray-500">Grade</p>
-                <p className="text-xl font-display font-700 text-accent-400">{submission.grade} / {a.marks}</p>
+                <p className="text-xs text-slate-500">Grade</p>
+                <p className="text-xl font-display font-700 text-accent-700">{submission.grade} / {a.marks}</p>
                 {submission.feedback && (
-                  <p className="text-xs text-gray-500 mt-1 max-w-xs text-right">{submission.feedback}</p>
+                  <p className="text-xs text-slate-500 mt-1 max-w-xs text-right">{submission.feedback}</p>
                 )}
               </div>
             ) : (

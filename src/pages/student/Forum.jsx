@@ -110,8 +110,8 @@ export default function ForumPage() {
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="font-display text-3xl font-700 text-white">Discussion Forum</h1>
-            <p className="text-gray-500 mt-1">Ask questions, share knowledge, collaborate.</p>
+            <h1 className="font-display text-3xl font-700 text-slate-900">Discussion Forum</h1>
+            <p className="text-slate-500 mt-1">Ask questions, share knowledge, collaborate.</p>
           </div>
           <button onClick={() => setShowForm(f => !f)} className="btn-primary">
             + New Thread
@@ -121,7 +121,7 @@ export default function ForumPage() {
         {/* New thread form */}
         {showForm && (
           <form onSubmit={createThread} className="card mb-6 animate-slide-up">
-            <h3 className="font-medium text-white mb-4">Create a new thread</h3>
+            <h3 className="font-medium text-slate-900 mb-4">Create a new thread</h3>
             <div className="space-y-3">
               <input
                 className="input"
@@ -158,16 +158,16 @@ export default function ForumPage() {
                 className={`w-full text-left p-4 rounded-xl border transition-all
                   ${selected?.id === t.id
                     ? 'border-primary-700 bg-primary-900/20'
-                    : 'border-gray-800 bg-gray-900 hover:border-gray-700'
+                    : 'border-slate-200 bg-white hover:border-slate-300'
                   }`}
               >
                 <div className="flex items-start justify-between gap-2 mb-1">
-                  <p className="text-sm font-medium text-gray-200 line-clamp-2">{t.title}</p>
+                  <p className="text-sm font-medium text-slate-700 line-clamp-2">{t.title}</p>
                   <span className={`badge flex-shrink-0 ${t.role === 'lecturer' ? 'badge-amber' : 'badge-blue'}`}>
                     {t.role}
                   </span>
                 </div>
-                <div className="flex items-center gap-3 text-xs text-gray-500">
+                <div className="flex items-center gap-3 text-xs text-slate-500">
                   <span>{t.authorEmail?.split('@')[0]}</span>
                   <span>•</span>
                   <span>💬 {t.replyCount || 0}</span>
@@ -177,7 +177,7 @@ export default function ForumPage() {
               </button>
             ))}
             {threads.length === 0 && (
-              <div className="text-center py-12 text-gray-600">
+              <div className="text-center py-12 text-slate-500">
                 <p className="text-3xl mb-2">💬</p>
                 <p className="text-sm">No threads yet. Start a discussion!</p>
               </div>
@@ -188,35 +188,35 @@ export default function ForumPage() {
           <div className="lg:col-span-3">
             {selected ? (
               <div className="card">
-                <button onClick={() => setSelected(null)} className="text-xs text-gray-500 hover:text-gray-300 mb-4">
+                <button onClick={() => setSelected(null)} className="text-xs text-slate-500 hover:text-slate-600 mb-4">
                   ← Back to threads
                 </button>
-                <h2 className="font-display text-xl font-700 text-white mb-1">{selected.title}</h2>
-                <div className="flex items-center gap-2 mb-4 text-xs text-gray-500">
+                <h2 className="font-display text-xl font-700 text-slate-900 mb-1">{selected.title}</h2>
+                <div className="flex items-center gap-2 mb-4 text-xs text-slate-500">
                   <span className={`badge ${selected.role === 'lecturer' ? 'badge-amber' : 'badge-blue'}`}>{selected.role}</span>
                   <span>{selected.authorEmail?.split('@')[0]}</span>
                   <span>•</span>
                   <span>{selected.createdAt?.toDate ? formatDistanceToNow(selected.createdAt.toDate(), { addSuffix: true }) : '—'}</span>
                 </div>
-                {selected.body && <p className="text-gray-300 text-sm mb-6 leading-relaxed">{selected.body}</p>}
+                {selected.body && <p className="text-slate-600 text-sm mb-6 leading-relaxed">{selected.body}</p>}
 
                 {/* Replies */}
                 <div className="space-y-3 mb-6">
                   {replies.map(r => (
                     <div key={r.id} className="flex gap-3">
                       <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-600 flex-shrink-0 mt-0.5
-                        ${r.role === 'lecturer' ? 'bg-accent-900/40 text-accent-400' : 'bg-primary-900/40 text-primary-400'}`}>
+                        ${r.role === 'lecturer' ? 'bg-accent-900/40 text-accent-700' : 'bg-primary-50 text-primary-700'}`}>
                         {r.authorEmail?.[0]?.toUpperCase()}
                       </div>
-                      <div className="flex-1 bg-gray-800/50 rounded-xl p-3">
+                      <div className="flex-1 bg-slate-100 rounded-xl p-3">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="text-xs font-medium text-gray-300">{r.authorEmail?.split('@')[0]}</span>
+                          <span className="text-xs font-medium text-slate-600">{r.authorEmail?.split('@')[0]}</span>
                           <span className={`badge ${r.role === 'lecturer' ? 'badge-amber' : 'badge-blue'}`}>{r.role}</span>
-                          <span className="text-xs text-gray-600 ml-auto">
+                          <span className="text-xs text-slate-500 ml-auto">
                             {r.createdAt?.toDate ? formatDistanceToNow(r.createdAt.toDate(), { addSuffix: true }) : '—'}
                           </span>
                         </div>
-                        <p className="text-sm text-gray-300">{r.body}</p>
+                        <p className="text-sm text-slate-600">{r.body}</p>
                       </div>
                     </div>
                   ))}
@@ -237,7 +237,7 @@ export default function ForumPage() {
               </div>
             ) : (
               <div className="card flex items-center justify-center min-h-[300px]">
-                <div className="text-center text-gray-600">
+                <div className="text-center text-slate-500">
                   <p className="text-4xl mb-3">💬</p>
                   <p>Select a thread to read and reply</p>
                 </div>

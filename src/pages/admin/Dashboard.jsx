@@ -35,21 +35,21 @@ export default function AdminDashboard() {
   }, [])
 
   const statCards = [
-    { label: 'Students',            value: stats.students,    emoji: '🎓', color: 'text-primary-400' },
-    { label: 'Lecturers',           value: stats.lecturers,   emoji: '👨‍🏫', color: 'text-blue-400' },
-    { label: 'Materials Uploaded',  value: stats.materials,   emoji: '📄', color: 'text-teal-400' },
-    { label: 'Assignments',         value: stats.assignments,  emoji: '📋', color: 'text-accent-400' },
-    { label: 'Submissions',         value: stats.submissions,  emoji: '📨', color: 'text-green-400' },
-    { label: 'Forum Threads',       value: stats.threads,     emoji: '💬', color: 'text-cyan-400' },
-    { label: 'BAGE Challenges Done', value: stats.challenges, emoji: '⚡', color: 'text-yellow-400' },
+    { label: 'Students',            value: stats.students,    emoji: '🎓', color: 'text-primary-700' },
+    { label: 'Lecturers',           value: stats.lecturers,   emoji: '👨‍🏫', color: 'text-sky-700' },
+    { label: 'Materials Uploaded',  value: stats.materials,   emoji: '📄', color: 'text-teal-700' },
+    { label: 'Assignments',         value: stats.assignments,  emoji: '📋', color: 'text-accent-700' },
+    { label: 'Submissions',         value: stats.submissions,  emoji: '📨', color: 'text-emerald-700' },
+    { label: 'Forum Threads',       value: stats.threads,     emoji: '💬', color: 'text-sky-700' },
+    { label: 'BAGE Challenges Done', value: stats.challenges, emoji: '⚡', color: 'text-accent-700' },
   ]
 
   return (
     <PageLayout>
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
-          <h1 className="font-display text-3xl font-700 text-white">Admin Dashboard</h1>
-          <p className="text-gray-500 mt-1">Platform-wide overview and management.</p>
+          <h1 className="font-display text-3xl font-700 text-slate-900">Admin Dashboard</h1>
+          <p className="text-slate-500 mt-1">Platform-wide overview and management.</p>
         </div>
 
         {/* Stats grid */}
@@ -58,7 +58,7 @@ export default function AdminDashboard() {
             <div key={s.label} className="card-sm">
               <p className="text-xl mb-1">{s.emoji}</p>
               <p className={`text-2xl font-display font-700 ${s.color}`}>{s.value}</p>
-              <p className="text-xs text-gray-500 mt-0.5">{s.label}</p>
+              <p className="text-xs text-slate-500 mt-0.5">{s.label}</p>
             </div>
           ))}
         </div>
@@ -66,7 +66,7 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-4">
             <div className="card">
-              <h3 className="font-display text-white font-700 mb-3">Quick Actions</h3>
+              <h3 className="font-display text-slate-900 font-700 mb-3">Quick Actions</h3>
               <div className="grid grid-cols-2 gap-3">
                 <a href="/admin/users" className="btn-secondary flex items-center gap-2 justify-center">
                   👥 Manage Users
@@ -84,22 +84,22 @@ export default function AdminDashboard() {
             </div>
 
             <div className="card border-primary-800/20 bg-primary-900/5">
-              <h3 className="font-display text-white font-700 mb-2">⚡ BAGE Engine Status</h3>
-              <p className="text-sm text-gray-400 mb-3">
+              <h3 className="font-display text-slate-900 font-700 mb-2">⚡ BAGE Engine Status</h3>
+              <p className="text-sm text-slate-500 mb-3">
                 Behaviour-Adaptive Gamification Engine is active. Cloud Functions monitor student actions in real-time.
               </p>
               <div className="grid grid-cols-3 gap-3 text-center">
-                <div className="bg-gray-800/50 rounded-xl p-3">
-                  <p className="text-xl font-display font-700 text-green-400">{stats.challenges}</p>
-                  <p className="text-xs text-gray-500">Challenges completed</p>
+                <div className="bg-slate-100 rounded-xl p-3">
+                  <p className="text-xl font-display font-700 text-emerald-700">{stats.challenges}</p>
+                  <p className="text-xs text-slate-500">Challenges completed</p>
                 </div>
-                <div className="bg-gray-800/50 rounded-xl p-3">
-                  <p className="text-xl font-display font-700 text-primary-400">5</p>
-                  <p className="text-xs text-gray-500">Pattern types</p>
+                <div className="bg-slate-100 rounded-xl p-3">
+                  <p className="text-xl font-display font-700 text-primary-700">5</p>
+                  <p className="text-xs text-slate-500">Pattern types</p>
                 </div>
-                <div className="bg-gray-800/50 rounded-xl p-3">
-                  <p className="text-xl font-display font-700 text-accent-400">Live</p>
-                  <p className="text-xs text-gray-500">Engine status</p>
+                <div className="bg-slate-100 rounded-xl p-3">
+                  <p className="text-xl font-display font-700 text-accent-700">Live</p>
+                  <p className="text-xs text-slate-500">Engine status</p>
                 </div>
               </div>
             </div>

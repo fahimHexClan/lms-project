@@ -17,17 +17,26 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        const snap = await getDoc(doc(db, 'users', firebaseUser.uid))
-        if (snap.exists()) {
-          setRole(snap.data().role)
+      try {
+        if (firebaseUser) {
+          const snap = await getDoc(doc(db, 'users', firebaseUser.uid))
+          if (snap.exists()) {
+            setRole(snap.data().role)
+          } else {
+            console.warn('User doc missing in Firestore for uid:', firebaseUser.uid)
+          }
+          setUser(firebaseUser)
+        } else {
+          setUser(null)
+          setRole(null)
         }
-        setUser(firebaseUser)
-      } else {
+      } catch (err) {
+        console.error('Auth/Firestore error:', err)
         setUser(null)
         setRole(null)
+      } finally {
+        setLoading(false)
       }
-      setLoading(false)
     })
     return unsubscribe
   }, [])

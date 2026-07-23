@@ -144,14 +144,14 @@ export default function AdminAnalytics() {
   )
 
   const metricCards = [
-    { label: 'Total Students',             value: summary.totalStudents,        unit: '',  color: 'text-primary-400' },
-    { label: 'Avg Points / Student',        value: summary.avgPoints,            unit: 'pts', color: 'text-accent-400' },
-    { label: 'On-Time Submission Rate',    value: `${summary.onTimeRate}%`,     unit: '',  color: summary.onTimeRate >= 70 ? 'text-green-400' : 'text-amber-400' },
-    { label: 'Forum-Active Students',      value: summary.forumActiveStudents,  unit: '',  color: 'text-cyan-400' },
-    { label: 'BAGE Challenge Completion',  value: `${summary.bageCompletionRate}%`, unit: '', color: 'text-yellow-400' },
-    { label: 'Total Submissions',          value: summary.totalSubmissions,     unit: '',  color: 'text-blue-400' },
-    { label: 'Graded Submissions',         value: summary.gradedSubmissions,    unit: '',  color: 'text-teal-400' },
-    { label: 'Ungraded',                   value: summary.totalSubmissions - summary.gradedSubmissions, unit: '', color: 'text-red-400' },
+    { label: 'Total Students',             value: summary.totalStudents,        unit: '',  color: 'text-primary-700' },
+    { label: 'Avg Points / Student',        value: summary.avgPoints,            unit: 'pts', color: 'text-accent-700' },
+    { label: 'On-Time Submission Rate',    value: `${summary.onTimeRate}%`,     unit: '',  color: summary.onTimeRate >= 70 ? 'text-emerald-700' : 'text-accent-700' },
+    { label: 'Forum-Active Students',      value: summary.forumActiveStudents,  unit: '',  color: 'text-sky-700' },
+    { label: 'BAGE Challenge Completion',  value: `${summary.bageCompletionRate}%`, unit: '', color: 'text-accent-700' },
+    { label: 'Total Submissions',          value: summary.totalSubmissions,     unit: '',  color: 'text-sky-700' },
+    { label: 'Graded Submissions',         value: summary.gradedSubmissions,    unit: '',  color: 'text-teal-700' },
+    { label: 'Ungraded',                   value: summary.totalSubmissions - summary.gradedSubmissions, unit: '', color: 'text-red-600' },
   ]
 
   return (
@@ -159,8 +159,8 @@ export default function AdminAnalytics() {
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="font-display text-3xl font-700 text-white">MIS Analytics</h1>
-            <p className="text-gray-500 mt-1">Platform engagement metrics and BAGE performance data.</p>
+            <h1 className="font-display text-3xl font-700 text-slate-900">MIS Analytics</h1>
+            <p className="text-slate-500 mt-1">Platform engagement metrics and BAGE performance data.</p>
           </div>
           <button onClick={exportToExcel} disabled={exporting} className="btn-primary flex items-center gap-2">
             {exporting ? (
@@ -173,7 +173,7 @@ export default function AdminAnalytics() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           {metricCards.map(m => (
             <div key={m.label} className="card-sm">
-              <p className="text-xs text-gray-500 mb-1">{m.label}</p>
+              <p className="text-xs text-slate-500 mb-1">{m.label}</p>
               <p className={`text-2xl font-display font-700 ${m.color}`}>{m.value}</p>
             </div>
           ))}
@@ -182,7 +182,7 @@ export default function AdminAnalytics() {
         {/* BAGE analysis */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           <div className="card">
-            <h3 className="font-display text-white font-700 mb-4">⚡ BAGE Challenge Breakdown</h3>
+            <h3 className="font-display text-slate-900 font-700 mb-4">⚡ BAGE Challenge Breakdown</h3>
             {(() => {
               const types = ['late_submission','broken_streak','forum_inactive','mentor','login_streak']
               const labels = {
@@ -199,10 +199,10 @@ export default function AdminAnalytics() {
                 return (
                   <div key={type} className="mb-3">
                     <div className="flex justify-between text-xs mb-1">
-                      <span className="text-gray-400">{labels[type]}</span>
-                      <span className="text-gray-500">{completed}/{total} — {pct}%</span>
+                      <span className="text-slate-500">{labels[type]}</span>
+                      <span className="text-slate-500">{completed}/{total} — {pct}%</span>
                     </div>
-                    <div className="h-1.5 bg-gray-800 rounded-full overflow-hidden">
+                    <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
                       <div className="h-full bg-gradient-to-r from-primary-500 to-accent-500 rounded-full transition-all duration-700"
                         style={{ width: `${pct}%` }} />
                     </div>
@@ -213,7 +213,7 @@ export default function AdminAnalytics() {
           </div>
 
           <div className="card">
-            <h3 className="font-display text-white font-700 mb-4">📊 Per-Student Engagement</h3>
+            <h3 className="font-display text-slate-900 font-700 mb-4">📊 Per-Student Engagement</h3>
             <div className="overflow-y-auto max-h-64 space-y-2">
               {data.users
                 .sort((a, b) => (b.points || 0) - (a.points || 0))
@@ -221,22 +221,22 @@ export default function AdminAnalytics() {
                   const beh  = data.behaviours.find(b => b.userId === u.id) || {}
                   const subs = data.submissions.filter(s => s.studentId === u.id)
                   return (
-                    <div key={u.id} className="flex items-center gap-3 p-2.5 rounded-xl bg-gray-800/40">
-                      <div className="w-7 h-7 rounded-full bg-gray-700 flex items-center justify-center text-xs font-600 text-primary-400 flex-shrink-0">
+                    <div key={u.id} className="flex items-center gap-3 p-2.5 rounded-xl bg-slate-100">
+                      <div className="w-7 h-7 rounded-full bg-slate-200 flex items-center justify-center text-xs font-600 text-primary-700 flex-shrink-0">
                         {(u.displayName || u.email)?.[0]?.toUpperCase()}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium text-gray-300 truncate">{u.displayName || u.email?.split('@')[0]}</p>
-                        <p className="text-xs text-gray-600">
+                        <p className="text-xs font-medium text-slate-600 truncate">{u.displayName || u.email?.split('@')[0]}</p>
+                        <p className="text-xs text-slate-500">
                           {subs.length} subs • streak {beh.loginStreak || 0}d • {beh.forumPostsThisWeek || 0} posts/wk
                         </p>
                       </div>
-                      <span className="text-xs font-mono font-600 text-accent-400">{u.points || 0} pts</span>
+                      <span className="text-xs font-mono font-600 text-accent-700">{u.points || 0} pts</span>
                     </div>
                   )
                 })}
               {data.users.length === 0 && (
-                <p className="text-gray-600 text-sm text-center py-6">No student data yet</p>
+                <p className="text-slate-500 text-sm text-center py-6">No student data yet</p>
               )}
             </div>
           </div>
@@ -244,28 +244,28 @@ export default function AdminAnalytics() {
 
         {/* Submission on-time analysis */}
         <div className="card">
-          <h3 className="font-display text-white font-700 mb-4">📨 Submission Analysis</h3>
+          <h3 className="font-display text-slate-900 font-700 mb-4">📨 Submission Analysis</h3>
           <div className="grid grid-cols-3 gap-4 mb-4">
             <div className="bg-green-900/10 border border-green-800/30 rounded-xl p-4 text-center">
-              <p className="text-2xl font-display font-700 text-green-400">
+              <p className="text-2xl font-display font-700 text-emerald-700">
                 {data.submissions.filter(s => s.isOnTime).length}
               </p>
-              <p className="text-xs text-gray-500 mt-1">On-time submissions</p>
+              <p className="text-xs text-slate-500 mt-1">On-time submissions</p>
             </div>
             <div className="bg-amber-900/10 border border-amber-800/30 rounded-xl p-4 text-center">
-              <p className="text-2xl font-display font-700 text-amber-400">
+              <p className="text-2xl font-display font-700 text-accent-700">
                 {data.submissions.filter(s => !s.isOnTime).length}
               </p>
-              <p className="text-xs text-gray-500 mt-1">Late submissions</p>
+              <p className="text-xs text-slate-500 mt-1">Late submissions</p>
             </div>
             <div className="bg-blue-900/10 border border-blue-800/30 rounded-xl p-4 text-center">
-              <p className="text-2xl font-display font-700 text-blue-400">
+              <p className="text-2xl font-display font-700 text-sky-700">
                 {data.submissions.filter(s => s.grade !== null).length}
               </p>
-              <p className="text-xs text-gray-500 mt-1">Graded</p>
+              <p className="text-xs text-slate-500 mt-1">Graded</p>
             </div>
           </div>
-          <p className="text-xs text-gray-600 text-center mt-2">
+          <p className="text-xs text-slate-500 text-center mt-2">
             Click "Export Excel" above to download the full 4-sheet report including BAGE logs, submission logs, and per-student data.
           </p>
         </div>

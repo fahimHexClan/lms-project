@@ -52,8 +52,8 @@ export default function AdminUsers() {
       <div className="max-w-5xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="font-display text-3xl font-700 text-white">User Management</h1>
-            <p className="text-gray-500 mt-1">Create and manage student, lecturer, and admin accounts.</p>
+            <h1 className="font-display text-3xl font-700 text-slate-900">User Management</h1>
+            <p className="text-slate-500 mt-1">Create and manage student, lecturer, and admin accounts.</p>
           </div>
           <button onClick={() => setShowForm(f => !f)} className="btn-primary">+ New User</button>
         </div>
@@ -61,7 +61,7 @@ export default function AdminUsers() {
         {/* Create user form */}
         {showForm && (
           <form onSubmit={handleCreate} className="card mb-6 animate-slide-up">
-            <h3 className="font-medium text-white mb-4">Create new account</h3>
+            <h3 className="font-medium text-slate-900 mb-4">Create new account</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
                 <label className="label">Full Name *</label>
@@ -104,7 +104,7 @@ export default function AdminUsers() {
               key={r}
               onClick={() => setFilter(r)}
               className={`px-4 py-1.5 rounded-xl text-sm font-medium transition-all
-                ${filter === r ? 'bg-primary-600/30 text-primary-300 border border-primary-700/50' : 'text-gray-500 hover:text-gray-300'}`}
+                ${filter === r ? 'bg-primary-600/30 text-primary-300 border border-primary-700/50' : 'text-slate-500 hover:text-slate-600'}`}
             >
               {r.charAt(0).toUpperCase() + r.slice(1)}
               <span className="ml-1.5 text-xs opacity-60">
@@ -119,40 +119,40 @@ export default function AdminUsers() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-800 text-left">
-                  <th className="px-5 py-3 text-xs font-medium text-gray-500">Name</th>
-                  <th className="px-5 py-3 text-xs font-medium text-gray-500">Email</th>
-                  <th className="px-5 py-3 text-xs font-medium text-gray-500">Role</th>
-                  <th className="px-5 py-3 text-xs font-medium text-gray-500">Points</th>
-                  <th className="px-5 py-3 text-xs font-medium text-gray-500">Badges</th>
-                  <th className="px-5 py-3 text-xs font-medium text-gray-500">Joined</th>
-                  <th className="px-5 py-3 text-xs font-medium text-gray-500">Actions</th>
+                <tr className="border-b border-slate-200 text-left">
+                  <th className="px-5 py-3 text-xs font-medium text-slate-500">Name</th>
+                  <th className="px-5 py-3 text-xs font-medium text-slate-500">Email</th>
+                  <th className="px-5 py-3 text-xs font-medium text-slate-500">Role</th>
+                  <th className="px-5 py-3 text-xs font-medium text-slate-500">Points</th>
+                  <th className="px-5 py-3 text-xs font-medium text-slate-500">Badges</th>
+                  <th className="px-5 py-3 text-xs font-medium text-slate-500">Joined</th>
+                  <th className="px-5 py-3 text-xs font-medium text-slate-500">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {filtered.map((u, i) => (
-                  <tr key={u.id} className={`border-b border-gray-800/50 hover:bg-gray-800/30 transition-colors ${i % 2 === 0 ? '' : 'bg-gray-900/20'}`}>
+                  <tr key={u.id} className={`border-b border-slate-200 hover:bg-slate-100/30 transition-colors ${i % 2 === 0 ? '' : 'bg-white/20'}`}>
                     <td className="px-5 py-3">
                       <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-full bg-gray-700 flex items-center justify-center text-xs font-600 text-primary-400">
+                        <div className="w-7 h-7 rounded-full bg-slate-200 flex items-center justify-center text-xs font-600 text-primary-700">
                           {(u.displayName || u.email)?.[0]?.toUpperCase()}
                         </div>
-                        <span className="text-gray-200">{u.displayName || '—'}</span>
+                        <span className="text-slate-700">{u.displayName || '—'}</span>
                       </div>
                     </td>
-                    <td className="px-5 py-3 text-gray-400">{u.email}</td>
+                    <td className="px-5 py-3 text-slate-500">{u.email}</td>
                     <td className="px-5 py-3">
                       <span className={`badge ${roleBadge[u.role] || 'badge-blue'}`}>{u.role}</span>
                     </td>
-                    <td className="px-5 py-3 text-accent-400 font-mono font-600">
+                    <td className="px-5 py-3 text-accent-700 font-mono font-600">
                       {(u.points || 0).toLocaleString()}
                     </td>
-                    <td className="px-5 py-3 text-gray-400">{u.badges?.length || 0}</td>
-                    <td className="px-5 py-3 text-gray-500">
+                    <td className="px-5 py-3 text-slate-500">{u.badges?.length || 0}</td>
+                    <td className="px-5 py-3 text-slate-500">
                       {u.createdAt?.toDate?.().toLocaleDateString() || '—'}
                     </td>
                     <td className="px-5 py-3">
-                      <button onClick={() => handleDelete(u)} className="text-xs text-red-400 hover:text-red-300">
+                      <button onClick={() => handleDelete(u)} className="text-xs text-red-600 hover:text-red-700">
                         Remove
                       </button>
                     </td>
@@ -161,7 +161,7 @@ export default function AdminUsers() {
               </tbody>
             </table>
             {filtered.length === 0 && (
-              <div className="text-center py-10 text-gray-600">
+              <div className="text-center py-10 text-slate-500">
                 <p className="text-3xl mb-2">👥</p>
                 <p className="text-sm">No users found</p>
               </div>

@@ -14,11 +14,11 @@ import toast from 'react-hot-toast'
 
 const EVENT_TYPES = ['lecture', 'assignment', 'exam', 'holiday', 'other']
 const typeColors = {
-  lecture:    'border-blue-800/40 bg-blue-900/20 text-blue-300',
-  assignment: 'border-red-800/40 bg-red-900/20 text-red-300',
+  lecture:    'border-sky-200 bg-blue-900/20 text-blue-300',
+  assignment: 'border-red-200 bg-red-900/20 text-red-300',
   exam:       'border-purple-800/40 bg-purple-900/20 text-purple-300',
-  holiday:    'border-green-800/40 bg-green-900/20 text-green-300',
-  other:      'border-gray-700 bg-gray-800/30 text-gray-300',
+  holiday:    'border-emerald-200 bg-green-900/20 text-green-300',
+  other:      'border-slate-300 bg-slate-100/30 text-slate-600',
 }
 
 export default function LecturerCalendar() {
@@ -77,8 +77,8 @@ export default function LecturerCalendar() {
       <div className="max-w-5xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="font-display text-3xl font-700 text-white">Academic Calendar</h1>
-            <p className="text-gray-500 mt-1">Create and manage academic events.</p>
+            <h1 className="font-display text-3xl font-700 text-slate-900">Academic Calendar</h1>
+            <p className="text-slate-500 mt-1">Create and manage academic events.</p>
           </div>
           {selected && (
             <button onClick={() => setShowForm(f => !f)} className="btn-primary">
@@ -90,7 +90,7 @@ export default function LecturerCalendar() {
         {/* Event creation form */}
         {showForm && selected && (
           <form onSubmit={createEvent} className="card mb-6 animate-slide-up">
-            <h3 className="font-medium text-white mb-4">New event on {format(selected, 'EEEE, MMMM d')}</h3>
+            <h3 className="font-medium text-slate-900 mb-4">New event on {format(selected, 'EEEE, MMMM d')}</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <div className="md:col-span-2">
                 <label className="label">Event Title *</label>
@@ -130,13 +130,13 @@ export default function LecturerCalendar() {
             <div className="flex items-center justify-between mb-6">
               <button onClick={() => setCurrent(d => new Date(d.getFullYear(), d.getMonth() - 1))}
                 className="btn-secondary px-3 py-1.5 text-sm">←</button>
-              <h2 className="font-display text-lg font-700 text-white">{format(current, 'MMMM yyyy')}</h2>
+              <h2 className="font-display text-lg font-700 text-slate-900">{format(current, 'MMMM yyyy')}</h2>
               <button onClick={() => setCurrent(d => new Date(d.getFullYear(), d.getMonth() + 1))}
                 className="btn-secondary px-3 py-1.5 text-sm">→</button>
             </div>
             <div className="grid grid-cols-7 mb-2">
               {['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d => (
-                <div key={d} className="text-center text-xs text-gray-600 font-medium py-1">{d}</div>
+                <div key={d} className="text-center text-xs text-slate-500 font-medium py-1">{d}</div>
               ))}
             </div>
             <div className="grid grid-cols-7 gap-1">
@@ -149,11 +149,11 @@ export default function LecturerCalendar() {
                     key={day.toISOString()}
                     onClick={() => { setSelected(day); setShowForm(false) }}
                     className={`relative aspect-square flex flex-col items-center justify-start pt-1 rounded-xl text-sm transition-all
-                      ${isSelected ? 'bg-primary-600/30 border border-primary-500' : 'hover:bg-gray-800'}
+                      ${isSelected ? 'bg-primary-600/30 border border-primary-500' : 'hover:bg-slate-100'}
                       ${isToday(day) ? 'ring-2 ring-accent-500/50' : ''}
                       ${!isSameMonth(day, current) ? 'opacity-30' : ''}`}
                   >
-                    <span className={`text-xs font-medium ${isToday(day) ? 'text-accent-400' : 'text-gray-300'}`}>
+                    <span className={`text-xs font-medium ${isToday(day) ? 'text-accent-700' : 'text-slate-600'}`}>
                       {format(day, 'd')}
                     </span>
                     {dayEvents.length > 0 && (
@@ -171,11 +171,11 @@ export default function LecturerCalendar() {
 
           {/* Events panel */}
           <div className="card">
-            <h3 className="font-display text-white font-700 mb-4">
+            <h3 className="font-display text-slate-900 font-700 mb-4">
               {selected ? format(selected, 'EEEE, MMMM d') : 'Select a day'}
             </h3>
             {selected && selectedEvents.length === 0 && (
-              <p className="text-gray-600 text-sm text-center py-6">No events. Click "+ Add Event" to create one.</p>
+              <p className="text-slate-500 text-sm text-center py-6">No events. Click "+ Add Event" to create one.</p>
             )}
             <div className="space-y-3">
               {selectedEvents.map(ev => (
@@ -187,7 +187,7 @@ export default function LecturerCalendar() {
                       {ev.description && <p className="text-xs opacity-70 mt-1">{ev.description}</p>}
                       <span className="badge mt-2 bg-white/10 text-current border-white/20 text-xs">{ev.type}</span>
                     </div>
-                    <button onClick={() => deleteEvent(ev)} className="text-xs text-red-400 hover:text-red-300 ml-2">✕</button>
+                    <button onClick={() => deleteEvent(ev)} className="text-xs text-red-600 hover:text-red-700 ml-2">✕</button>
                   </div>
                 </div>
               ))}

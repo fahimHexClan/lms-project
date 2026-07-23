@@ -68,8 +68,8 @@ export default function LecturerContent() {
       <div className="max-w-5xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="font-display text-3xl font-700 text-white">Content Library</h1>
-            <p className="text-gray-500 mt-1">Upload and manage lecture materials.</p>
+            <h1 className="font-display text-3xl font-700 text-slate-900">Content Library</h1>
+            <p className="text-slate-500 mt-1">Upload and manage lecture materials.</p>
           </div>
           <button onClick={() => setShowForm(f => !f)} className="btn-primary">
             + Upload Material
@@ -79,7 +79,7 @@ export default function LecturerContent() {
         {/* Upload form */}
         {showForm && (
           <form onSubmit={handleUpload} className="card mb-6 animate-slide-up">
-            <h3 className="font-medium text-white mb-4">Upload new material</h3>
+            <h3 className="font-medium text-slate-900 mb-4">Upload new material</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
                 <label className="label">Title *</label>
@@ -100,9 +100,9 @@ export default function LecturerContent() {
             <div className="mb-4">
               <label className="label">File (PDF or PPTX) *</label>
               <input type="file" accept=".pdf,.ppt,.pptx,.doc,.docx"
-                className="block text-sm text-gray-400 file:mr-3 file:btn-secondary file:border-0 file:text-xs file:cursor-pointer"
+                className="block text-sm text-slate-500 file:mr-3 file:btn-secondary file:border-0 file:text-xs file:cursor-pointer"
                 onChange={e => setFile(e.target.files[0])} required />
-              {file && <p className="text-xs text-gray-500 mt-1">📎 {file.name} ({(file.size / 1024).toFixed(0)} KB)</p>}
+              {file && <p className="text-xs text-slate-500 mt-1">📎 {file.name} ({(file.size / 1024).toFixed(0)} KB)</p>}
             </div>
             <div className="flex gap-2">
               <button type="submit" disabled={uploading} className="btn-primary flex items-center gap-2">
@@ -116,16 +116,16 @@ export default function LecturerContent() {
         {/* Materials list */}
         <div className="space-y-3">
           {materials.map(m => (
-            <div key={m.id} className="card flex items-center gap-4 hover:border-gray-700 transition-colors">
-              <div className="w-10 h-10 rounded-xl bg-primary-900/40 border border-primary-800/30 flex items-center justify-center flex-shrink-0">
+            <div key={m.id} className="card flex items-center gap-4 hover:border-slate-300 transition-colors">
+              <div className="w-10 h-10 rounded-xl bg-primary-50 border border-primary-200 flex items-center justify-center flex-shrink-0">
                 <span className="text-xl">{m.fileType?.includes('pdf') ? '📄' : '📊'}</span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-gray-200">{m.title}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{m.module} • {m.fileName} • {(m.fileSize / 1024).toFixed(0)} KB</p>
-                {m.description && <p className="text-xs text-gray-600 mt-0.5 truncate">{m.description}</p>}
+                <p className="font-medium text-slate-700">{m.title}</p>
+                <p className="text-xs text-slate-500 mt-0.5">{m.module} • {m.fileName} • {(m.fileSize / 1024).toFixed(0)} KB</p>
+                {m.description && <p className="text-xs text-slate-500 mt-0.5 truncate">{m.description}</p>}
               </div>
-              <span className="text-xs text-gray-600 flex-shrink-0">
+              <span className="text-xs text-slate-500 flex-shrink-0">
                 {m.uploadedAt?.toDate?.().toLocaleDateString() || '—'}
               </span>
               <div className="flex gap-2 flex-shrink-0">
@@ -135,7 +135,7 @@ export default function LecturerContent() {
             </div>
           ))}
           {materials.length === 0 && (
-            <div className="text-center py-20 text-gray-600">
+            <div className="text-center py-20 text-slate-500">
               <p className="text-4xl mb-3">📂</p>
               <p>No materials uploaded yet</p>
             </div>

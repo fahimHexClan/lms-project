@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import toast from 'react-hot-toast'
@@ -27,9 +28,9 @@ const navConfigs = {
 }
 
 const roleColors = {
-  student:  'text-primary-400',
-  lecturer: 'text-accent-400',
-  admin:    'text-green-400',
+  student:  'text-primary-700',
+  lecturer: 'text-accent-700',
+  admin:    'text-emerald-700',
 }
 const roleBadge = {
   student:  'badge-purple',
@@ -37,7 +38,7 @@ const roleBadge = {
   admin:    'badge-green',
 }
 
-export default function Sidebar() {
+function SidebarContent({ onNavigate }) {
   const { user, role, logout } = useAuth()
   const navigate = useNavigate()
   const links = navConfigs[role] || []
@@ -49,17 +50,17 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className="w-64 min-h-screen bg-gray-900 border-r border-gray-800 flex flex-col fixed left-0 top-0 bottom-0 z-10">
+    <>
       {/* Brand */}
-      <div className="p-5 border-b border-gray-800">
+      <div className="p-5 border-b border-slate-200">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-primary-600/20 border border-primary-500/30 flex items-center justify-center flex-shrink-0">
-            <svg className="w-5 h-5 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="w-9 h-9 rounded-xl bg-primary-600 flex items-center justify-center flex-shrink-0">
+            <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                 d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
             </svg>
           </div>
-          <span className="font-display text-white font-700 text-lg">EduCore</span>
+          <span className="font-display text-slate-900 font-700 text-lg">EduCore</span>
         </div>
       </div>
 
@@ -70,6 +71,7 @@ export default function Sidebar() {
             key={to}
             to={to}
             end={to === `/${role}`}
+            onClick={onNavigate}
             className={({ isActive }) =>
               `nav-link ${isActive ? 'active' : ''}`
             }
@@ -81,31 +83,88 @@ export default function Sidebar() {
       </nav>
 
       {/* User info + logout */}
-      <div className="p-3 border-t border-gray-800">
-        <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-gray-800/50 mb-2">
-          <div className={`w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-sm font-600 ${roleColors[role]}`}>
+      <div className="p-3 border-t border-slate-200">
+        <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-slate-100 mb-2">
+          <div className={`w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-sm font-600 flex-shrink-0 ${roleColors[role]}`}>
             {user?.email?.[0]?.toUpperCase()}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-medium text-gray-300 truncate">{user?.email}</p>
+            <p className="text-xs font-medium text-slate-700 truncate">{user?.email}</p>
             <span className={`badge ${roleBadge[role]} mt-0.5`}>{role}</span>
           </div>
         </div>
-        <button onClick={handleLogout} className="nav-link w-full text-red-400 hover:text-red-300 hover:bg-red-900/20">
+        <button onClick={handleLogout} className="nav-link w-full text-red-500 hover:text-red-600 hover:bg-red-50">
           <LogoutIcon className="w-4 h-4" />
           Sign out
         </button>
       </div>
+    </>
+  )
+}
+
+export default function Sidebar() {
+  return (
+    <aside className="hidden lg:flex w-64 min-h-screen bg-white border-r border-slate-200 flex-col fixed left-0 top-0 bottom-0 z-20">
+      <SidebarContent />
     </aside>
   )
 }
 
-// Layout wrapper used by every protected page
+// Layout wrapper used by every protected page — handles mobile hamburger + desktop fixed sidebar
 export function PageLayout({ children }) {
+  const [mobileOpen, setMobileOpen] = useState(false)
+
   return (
-    <div className="flex min-h-screen bg-gray-950">
+    <div className="min-h-screen bg-slate-50 lg:flex">
+      {/* Desktop sidebar */}
       <Sidebar />
-      <main className="flex-1 ml-64 p-8 animate-fade-in">
+
+      {/* Mobile top bar */}
+      <div className="lg:hidden sticky top-0 z-20 flex items-center justify-between bg-white border-b border-slate-200 px-4 py-3">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center">
+            <svg className="w-4.5 h-4.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+            </svg>
+          </div>
+          <span className="font-display text-slate-900 font-700 text-base">EduCore</span>
+        </div>
+        <button
+          onClick={() => setMobileOpen(true)}
+          className="p-2 rounded-lg text-slate-600 hover:bg-slate-100"
+          aria-label="Open menu"
+        >
+          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Mobile drawer overlay */}
+      {mobileOpen && (
+        <div className="lg:hidden fixed inset-0 z-30 flex">
+          <div
+            className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm animate-fade-in"
+            onClick={() => setMobileOpen(false)}
+          />
+          <aside className="relative w-72 max-w-[80%] bg-white flex flex-col shadow-card-hover animate-slide-up">
+            <button
+              onClick={() => setMobileOpen(false)}
+              className="absolute top-4 right-4 p-1.5 rounded-lg text-slate-400 hover:bg-slate-100"
+              aria-label="Close menu"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <SidebarContent onNavigate={() => setMobileOpen(false)} />
+          </aside>
+        </div>
+      )}
+
+      {/* Main content */}
+      <main className="flex-1 lg:ml-64 p-4 sm:p-6 lg:p-8 animate-fade-in min-w-0">
         {children}
       </main>
     </div>
