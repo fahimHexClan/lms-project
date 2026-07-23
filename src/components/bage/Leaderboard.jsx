@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore'
+import { collection, query, where, orderBy, limit, onSnapshot } from 'firebase/firestore'
 import { db } from '../../services/firebase'
 import { useAuth } from '../../context/AuthContext'
 
@@ -12,6 +12,7 @@ export default function Leaderboard({ maxRows = 10 }) {
   useEffect(() => {
     const q = query(
       collection(db, 'users'),
+      where('role', '==', 'student'),
       orderBy('points', 'desc'),
       limit(maxRows)
     )
@@ -58,7 +59,7 @@ export default function Leaderboard({ maxRows = 10 }) {
           </div>
         ))}
         {leaders.length === 0 && (
-          <p className="text-gray-600 text-sm text-center py-4">No entries yet</p>
+          <p className="text-gray-600 text-sm text-center py-4">No students yet</p>
         )}
       </div>
     </div>
