@@ -3,11 +3,19 @@ import {
   collection, query, orderBy, onSnapshot,
   addDoc, serverTimestamp, doc, updateDoc, increment, where, getDocs
 } from 'firebase/firestore'
-import { db } from '../../services/firebase'
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
+import { db, storage } from '../../services/firebase'
 import { useAuth } from '../../context/AuthContext'
 import { PageLayout } from '../../components/common/Sidebar'
 import { formatDistanceToNow } from 'date-fns'
 import toast from 'react-hot-toast'
+
+const roleBadge = { student: 'badge-blue', lecturer: 'badge-amber', admin: 'badge-green' }
+const roleAvatar = {
+  student:  'bg-primary-50 text-primary-700',
+  lecturer: 'bg-accent-100 text-accent-700',
+  admin:    'bg-emerald-50 text-emerald-700',
+}
 
 export default function ForumPage() {
   const { user, role } = useAuth()
@@ -16,7 +24,9 @@ export default function ForumPage() {
   const [replies, setReplies]         = useState([])
   const [newTitle, setNewTitle]       = useState('')
   const [newBody, setNewBody]         = useState('')
+  const [newFile, setNewFile]         = useState(null)
   const [replyBody, setReplyBody]     = useState('')
+  const [replyFile, setReplyFile]     = useState(null)
   const [showForm, setShowForm]       = useState(false)
   const [submitting, setSubmitting]   = useState(false)
 
@@ -37,11 +47,21 @@ export default function ForumPage() {
     return onSnapshot(q, snap => setReplies(snap.docs.map(d => ({ id: d.id, ...d.data() }))))
   }, [selected])
 
+  const uploadAttachment = async (file, folder) => {
+    const path = `forum/${folder}/${user.uid}/${Date.now()}_${file.name}`
+    const snap = await uploadBytes(ref(storage, path), file)
+    const url  = await getDownloadURL(snap.ref)
+    return { fileUrl: url, fileName: file.name, storagePath: path }
+  }
+
   const createThread = async (e) => {
     e.preventDefault()
     if (!newTitle.trim()) return
     setSubmitting(true)
     try {
+      let attachment = {}
+      if (newFile) attachment = await uploadAttachment(newFile, 'threads')
+
       await addDoc(collection(db, 'forumThreads'), {
         title:         newTitle.trim(),
         body:          newBody.trim(),
@@ -49,6 +69,9 @@ export default function ForumPage() {
         authorEmail:   user.email,
         role,
         replyCount:    0,
+        fileUrl:       attachment.fileUrl     || null,
+        fileName:      attachment.fileName    || null,
+        storagePath:   attachment.storagePath || null,
         createdAt:     serverTimestamp(),
       })
       // Award points + update behaviour
@@ -63,10 +86,12 @@ export default function ForumPage() {
       }
       setNewTitle('')
       setNewBody('')
+      setNewFile(null)
       setShowForm(false)
       toast.success('Thread posted! +5 pts')
     } catch (err) {
       toast.error('Failed to post thread.')
+      console.error(err)
     } finally {
       setSubmitting(false)
     }
@@ -74,15 +99,21 @@ export default function ForumPage() {
 
   const postReply = async (e) => {
     e.preventDefault()
-    if (!replyBody.trim() || !selected) return
+    if ((!replyBody.trim() && !replyFile) || !selected) return
     setSubmitting(true)
     try {
+      let attachment = {}
+      if (replyFile) attachment = await uploadAttachment(replyFile, 'replies')
+
       await addDoc(collection(db, 'forumReplies'), {
         threadId:    selected.id,
         body:        replyBody.trim(),
         authorId:    user.uid,
         authorEmail: user.email,
         role,
+        fileUrl:     attachment.fileUrl     || null,
+        fileName:    attachment.fileName    || null,
+        storagePath: attachment.storagePath || null,
         createdAt:   serverTimestamp(),
       })
       await updateDoc(doc(db, 'forumThreads', selected.id), {
@@ -97,9 +128,11 @@ export default function ForumPage() {
         })
       }
       setReplyBody('')
+      setReplyFile(null)
       toast.success('Reply posted! +3 pts')
-    } catch {
+    } catch (err) {
       toast.error('Failed to post reply.')
+      console.error(err)
     } finally {
       setSubmitting(false)
     }
@@ -136,9 +169,16 @@ export default function ForumPage() {
                 value={newBody}
                 onChange={e => setNewBody(e.target.value)}
               />
+              <div>
+                <label className="label">Attach a file (optional)</label>
+                <input type="file"
+                  className="block text-sm text-slate-500 file:mr-3 file:btn-secondary file:border-0 file:text-xs file:cursor-pointer"
+                  onChange={e => setNewFile(e.target.files[0])} />
+                {newFile && <p className="text-xs text-slate-500 mt-1">📎 {newFile.name} ({(newFile.size / 1024).toFixed(0)} KB)</p>}
+              </div>
               <div className="flex gap-2">
-                <button type="submit" disabled={submitting} className="btn-primary">
-                  {submitting ? 'Posting…' : 'Post Thread'}
+                <button type="submit" disabled={submitting} className="btn-primary flex items-center gap-2">
+                  {submitting ? <><span className="animate-spin h-3 w-3 border-2 border-white border-t-transparent rounded-full" /> Posting…</> : 'Post Thread'}
                 </button>
                 <button type="button" onClick={() => setShowForm(false)} className="btn-secondary">
                   Cancel
@@ -157,13 +197,15 @@ export default function ForumPage() {
                 onClick={() => setSelected(t)}
                 className={`w-full text-left p-4 rounded-xl border transition-all
                   ${selected?.id === t.id
-                    ? 'border-primary-700 bg-primary-900/20'
+                    ? 'border-primary-600 bg-primary-50'
                     : 'border-slate-200 bg-white hover:border-slate-300'
                   }`}
               >
                 <div className="flex items-start justify-between gap-2 mb-1">
-                  <p className="text-sm font-medium text-slate-700 line-clamp-2">{t.title}</p>
-                  <span className={`badge flex-shrink-0 ${t.role === 'lecturer' ? 'badge-amber' : 'badge-blue'}`}>
+                  <p className="text-sm font-medium text-slate-700 line-clamp-2">
+                    {t.fileUrl && <span className="mr-1">📎</span>}{t.title}
+                  </p>
+                  <span className={`badge flex-shrink-0 ${roleBadge[t.role] || 'badge-blue'}`}>
                     {t.role}
                   </span>
                 </div>
@@ -193,46 +235,73 @@ export default function ForumPage() {
                 </button>
                 <h2 className="font-display text-xl font-700 text-slate-900 mb-1">{selected.title}</h2>
                 <div className="flex items-center gap-2 mb-4 text-xs text-slate-500">
-                  <span className={`badge ${selected.role === 'lecturer' ? 'badge-amber' : 'badge-blue'}`}>{selected.role}</span>
+                  <span className={`badge ${roleBadge[selected.role] || 'badge-blue'}`}>{selected.role}</span>
                   <span>{selected.authorEmail?.split('@')[0]}</span>
                   <span>•</span>
                   <span>{selected.createdAt?.toDate ? formatDistanceToNow(selected.createdAt.toDate(), { addSuffix: true }) : '—'}</span>
                 </div>
-                {selected.body && <p className="text-slate-600 text-sm mb-6 leading-relaxed">{selected.body}</p>}
+                {selected.body && <p className="text-slate-600 text-sm mb-3 leading-relaxed">{selected.body}</p>}
+                {selected.fileUrl && (
+                  <a href={selected.fileUrl} target="_blank" rel="noreferrer"
+                    className="inline-flex items-center gap-1 text-xs text-primary-700 hover:text-primary-800 underline underline-offset-2 mb-6">
+                    📎 {selected.fileName}
+                  </a>
+                )}
 
                 {/* Replies */}
-                <div className="space-y-3 mb-6">
+                <div className="space-y-3 mb-6 mt-4">
                   {replies.map(r => (
                     <div key={r.id} className="flex gap-3">
                       <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-600 flex-shrink-0 mt-0.5
-                        ${r.role === 'lecturer' ? 'bg-accent-900/40 text-accent-700' : 'bg-primary-50 text-primary-700'}`}>
+                        ${roleAvatar[r.role] || roleAvatar.student}`}>
                         {r.authorEmail?.[0]?.toUpperCase()}
                       </div>
                       <div className="flex-1 bg-slate-100 rounded-xl p-3">
                         <div className="flex items-center gap-2 mb-1">
                           <span className="text-xs font-medium text-slate-600">{r.authorEmail?.split('@')[0]}</span>
-                          <span className={`badge ${r.role === 'lecturer' ? 'badge-amber' : 'badge-blue'}`}>{r.role}</span>
+                          <span className={`badge ${roleBadge[r.role] || 'badge-blue'}`}>{r.role}</span>
                           <span className="text-xs text-slate-500 ml-auto">
                             {r.createdAt?.toDate ? formatDistanceToNow(r.createdAt.toDate(), { addSuffix: true }) : '—'}
                           </span>
                         </div>
-                        <p className="text-sm text-slate-600">{r.body}</p>
+                        {r.body && <p className="text-sm text-slate-600">{r.body}</p>}
+                        {r.fileUrl && (
+                          <a href={r.fileUrl} target="_blank" rel="noreferrer"
+                            className="inline-flex items-center gap-1 text-xs text-primary-700 hover:text-primary-800 underline underline-offset-2 mt-1">
+                            📎 {r.fileName}
+                          </a>
+                        )}
                       </div>
                     </div>
                   ))}
                 </div>
 
                 {/* Reply form */}
-                <form onSubmit={postReply} className="flex gap-2">
-                  <input
-                    className="input flex-1 text-sm"
-                    placeholder="Write a reply…"
-                    value={replyBody}
-                    onChange={e => setReplyBody(e.target.value)}
-                  />
-                  <button type="submit" disabled={submitting || !replyBody.trim()} className="btn-primary flex-shrink-0">
-                    Reply
-                  </button>
+                <form onSubmit={postReply} className="space-y-2">
+                  <div className="flex gap-2">
+                    <input
+                      className="input flex-1 text-sm"
+                      placeholder="Write a reply…"
+                      value={replyBody}
+                      onChange={e => setReplyBody(e.target.value)}
+                    />
+                    <button type="submit" disabled={submitting || (!replyBody.trim() && !replyFile)} className="btn-primary flex-shrink-0">
+                      {submitting ? '…' : 'Reply'}
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input type="file" id="reply-file"
+                      className="hidden"
+                      onChange={e => setReplyFile(e.target.files[0])} />
+                    <label htmlFor="reply-file" className="text-xs text-slate-500 hover:text-slate-600 cursor-pointer underline underline-offset-2">
+                      {replyFile ? `📎 ${replyFile.name}` : '+ Attach a file'}
+                    </label>
+                    {replyFile && (
+                      <button type="button" onClick={() => setReplyFile(null)} className="text-xs text-red-600 hover:text-red-700">
+                        Remove
+                      </button>
+                    )}
+                  </div>
                 </form>
               </div>
             ) : (

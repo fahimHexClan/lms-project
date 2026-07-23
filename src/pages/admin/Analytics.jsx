@@ -246,19 +246,19 @@ export default function AdminAnalytics() {
         <div className="card">
           <h3 className="font-display text-slate-900 font-700 mb-4">📨 Submission Analysis</h3>
           <div className="grid grid-cols-3 gap-4 mb-4">
-            <div className="bg-green-900/10 border border-green-800/30 rounded-xl p-4 text-center">
+            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-center">
               <p className="text-2xl font-display font-700 text-emerald-700">
                 {data.submissions.filter(s => s.isOnTime).length}
               </p>
               <p className="text-xs text-slate-500 mt-1">On-time submissions</p>
             </div>
-            <div className="bg-amber-900/10 border border-amber-800/30 rounded-xl p-4 text-center">
+            <div className="bg-accent-50 border border-accent-200 rounded-xl p-4 text-center">
               <p className="text-2xl font-display font-700 text-accent-700">
                 {data.submissions.filter(s => !s.isOnTime).length}
               </p>
               <p className="text-xs text-slate-500 mt-1">Late submissions</p>
             </div>
-            <div className="bg-blue-900/10 border border-blue-800/30 rounded-xl p-4 text-center">
+            <div className="bg-sky-50 border border-sky-200 rounded-xl p-4 text-center">
               <p className="text-2xl font-display font-700 text-sky-700">
                 {data.submissions.filter(s => s.grade !== null).length}
               </p>

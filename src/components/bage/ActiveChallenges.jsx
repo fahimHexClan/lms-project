@@ -14,11 +14,11 @@ const challengeIcons = {
 }
 
 const challengeColors = {
-  late_submission: 'border-accent-200 bg-amber-900/10',
-  broken_streak:   'border-orange-800/40 bg-orange-900/10',
-  forum_inactive:  'border-sky-200 bg-blue-900/10',
-  mentor:          'border-purple-800/40 bg-purple-900/10',
-  login_streak:    'border-emerald-200 bg-green-900/10',
+  late_submission: 'border-accent-200 bg-accent-50',
+  broken_streak:   'border-orange-200 bg-orange-50',
+  forum_inactive:  'border-sky-200 bg-sky-50',
+  mentor:          'border-purple-200 bg-purple-50',
+  login_streak:    'border-emerald-200 bg-emerald-50',
 }
 
 export default function ActiveChallenges() {
@@ -59,7 +59,7 @@ export default function ActiveChallenges() {
   if (!challenges.length) return null
 
   return (
-    <div className="card border-primary-200 bg-primary-900/10">
+    <div className="card border-primary-200 bg-primary-50">
       <div className="flex items-center gap-2 mb-4">
         <span className="text-lg">⚡</span>
         <h3 className="font-display text-slate-900 font-700">Active Challenges</h3>
@@ -69,7 +69,7 @@ export default function ActiveChallenges() {
         {challenges.map(ch => (
           <div
             key={ch.id}
-            className={`border rounded-xl p-4 ${challengeColors[ch.type] || 'border-slate-300 bg-slate-100/30'}`}
+            className={`border rounded-xl p-4 ${challengeColors[ch.type] || 'border-slate-300 bg-slate-50'}`}
           >
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-start gap-3">

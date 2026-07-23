@@ -14,11 +14,11 @@ import toast from 'react-hot-toast'
 
 const EVENT_TYPES = ['lecture', 'assignment', 'exam', 'holiday', 'other']
 const typeColors = {
-  lecture:    'border-sky-200 bg-blue-900/20 text-blue-300',
-  assignment: 'border-red-200 bg-red-900/20 text-red-300',
-  exam:       'border-purple-800/40 bg-purple-900/20 text-purple-300',
-  holiday:    'border-emerald-200 bg-green-900/20 text-green-300',
-  other:      'border-slate-300 bg-slate-100/30 text-slate-600',
+  lecture:    'border-sky-200 bg-sky-50 text-sky-700',
+  assignment: 'border-red-200 bg-red-50 text-red-700',
+  exam:       'border-purple-200 bg-purple-50 text-purple-700',
+  holiday:    'border-emerald-200 bg-emerald-50 text-emerald-700',
+  other:      'border-slate-300 bg-slate-50 text-slate-600',
 }
 
 export default function LecturerCalendar() {
@@ -149,7 +149,7 @@ export default function LecturerCalendar() {
                     key={day.toISOString()}
                     onClick={() => { setSelected(day); setShowForm(false) }}
                     className={`relative aspect-square flex flex-col items-center justify-start pt-1 rounded-xl text-sm transition-all
-                      ${isSelected ? 'bg-primary-600/30 border border-primary-500' : 'hover:bg-slate-100'}
+                      ${isSelected ? 'bg-primary-100 border border-primary-400' : 'hover:bg-slate-100'}
                       ${isToday(day) ? 'ring-2 ring-accent-500/50' : ''}
                       ${!isSameMonth(day, current) ? 'opacity-30' : ''}`}
                   >
@@ -185,7 +185,7 @@ export default function LecturerCalendar() {
                       <p className="font-medium text-sm">{ev.title}</p>
                       {ev.time && <p className="text-xs opacity-70 mt-0.5">🕐 {ev.time}</p>}
                       {ev.description && <p className="text-xs opacity-70 mt-1">{ev.description}</p>}
-                      <span className="badge mt-2 bg-white/10 text-current border-white/20 text-xs">{ev.type}</span>
+                      <span className="badge mt-2 bg-white/60 text-current border-current/20 text-xs">{ev.type}</span>
                     </div>
                     <button onClick={() => deleteEvent(ev)} className="text-xs text-red-600 hover:text-red-700 ml-2">✕</button>
                   </div>

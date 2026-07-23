@@ -5,10 +5,10 @@ import { PageLayout } from '../../components/common/Sidebar'
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isToday, isSameMonth } from 'date-fns'
 
 const typeColors = {
-  lecture:    'bg-blue-900/50 text-blue-300 border-sky-200',
-  assignment: 'bg-red-900/50 text-red-300 border-red-200',
-  exam:       'bg-purple-900/50 text-purple-300 border-purple-800/40',
-  holiday:    'bg-green-900/50 text-green-300 border-emerald-200',
+  lecture:    'bg-sky-50 text-sky-700 border-sky-200',
+  assignment: 'bg-red-50 text-red-700 border-red-200',
+  exam:       'bg-purple-50 text-purple-700 border-purple-200',
+  holiday:    'bg-emerald-50 text-emerald-700 border-emerald-200',
   other:      'bg-slate-100 text-slate-600 border-slate-300',
 }
 
@@ -74,7 +74,7 @@ export default function StudentCalendar() {
                     key={day.toISOString()}
                     onClick={() => setSelected(day)}
                     className={`relative aspect-square flex flex-col items-center justify-start pt-1 rounded-xl text-sm transition-all
-                      ${isSelected ? 'bg-primary-600/30 border border-primary-500' : 'hover:bg-slate-100'}
+                      ${isSelected ? 'bg-primary-100 border border-primary-400' : 'hover:bg-slate-100'}
                       ${isToday(day) ? 'ring-2 ring-accent-500/50' : ''}
                       ${!isSameMonth(day, current) ? 'opacity-30' : ''}
                     `}
@@ -109,7 +109,7 @@ export default function StudentCalendar() {
                   <p className="font-medium text-sm">{e.title}</p>
                   {e.time && <p className="text-xs opacity-70 mt-0.5">🕐 {e.time}</p>}
                   {e.description && <p className="text-xs opacity-70 mt-1">{e.description}</p>}
-                  <span className="badge mt-2 bg-white/10 text-current border-white/20">{e.type}</span>
+                  <span className="badge mt-2 bg-white/60 text-current border-current/20">{e.type}</span>
                 </div>
               ))}
             </div>

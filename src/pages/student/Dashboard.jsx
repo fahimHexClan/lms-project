@@ -105,7 +105,7 @@ export default function StudentDashboard() {
           <div className="lg:col-span-2 card">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-display text-slate-900 font-700">Upcoming Assignments</h3>
-              <a href="/student/assignments" className="text-xs text-primary-700 hover:text-primary-300">View all →</a>
+              <a href="/student/assignments" className="text-xs text-primary-700 hover:text-primary-800">View all →</a>
             </div>
             {recentAssignments.length === 0 ? (
               <p className="text-slate-500 text-sm text-center py-6">No upcoming assignments</p>

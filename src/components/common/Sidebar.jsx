@@ -23,6 +23,7 @@ const navConfigs = {
     { to: '/admin',           label: 'Dashboard',  icon: HomeIcon },
     { to: '/admin/users',     label: 'Users',      icon: UsersIcon },
     { to: '/admin/analytics', label: 'Analytics',  icon: ChartIcon },
+    { to: '/admin/forum',     label: 'Forum',      icon: ChatIcon },
     { to: '/admin/calendar',  label: 'Calendar',   icon: CalendarIcon },
   ],
 }

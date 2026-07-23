@@ -74,7 +74,7 @@ export default function LecturerDashboard() {
                   <span className={`badge ${s.grade !== null ? 'badge-blue' : 'badge-red'}`}>
                     {s.grade !== null ? `${s.grade} pts` : 'Ungraded'}
                   </span>
-                  <a href="/lecturer/assignments" className="text-xs text-primary-700 hover:text-primary-300">Grade →</a>
+                  <a href="/lecturer/assignments" className="text-xs text-primary-700 hover:text-primary-800">Grade →</a>
                 </div>
               ))}
             </div>

@@ -127,8 +127,8 @@ export default function StudentGamification() {
                       key={b.name}
                       className={`rounded-xl p-3 text-center border transition-all ${
                         earned
-                          ? 'border-primary-700/50 bg-primary-900/20'
-                          : 'border-slate-200 bg-slate-100/30 opacity-40 grayscale'
+                          ? 'border-primary-300 bg-primary-50'
+                          : 'border-slate-200 bg-slate-50 opacity-40 grayscale'
                       }`}
                     >
                       <span className="text-3xl block mb-1">{b.emoji}</span>
@@ -146,7 +146,7 @@ export default function StudentGamification() {
                 <h3 className="font-display text-slate-900 font-700 mb-4">✅ Completed Challenges</h3>
                 <div className="space-y-2">
                   {completedChallenges.map(ch => (
-                    <div key={ch.id} className="flex items-center gap-3 p-3 rounded-xl bg-green-900/10 border border-green-800/20">
+                    <div key={ch.id} className="flex items-center gap-3 p-3 rounded-xl bg-emerald-50 border border-emerald-200">
                       <span className="text-lg">✅</span>
                       <div className="flex-1">
                         <p className="text-sm text-slate-600">{ch.title}</p>

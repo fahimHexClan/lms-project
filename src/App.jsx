@@ -25,6 +25,7 @@ import AdminDashboard from './pages/admin/Dashboard'
 import AdminUsers     from './pages/admin/Users'
 import AdminAnalytics from './pages/admin/Analytics'
 import AdminCalendar  from './pages/admin/Calendar'
+import AdminForum     from './pages/admin/Forum'
 
 function StudentLayout({ children }) {
   return (
@@ -74,6 +75,7 @@ export default function App() {
           <Route path="/admin"           element={<AdminLayout><AdminDashboard /></AdminLayout>} />
           <Route path="/admin/users"     element={<AdminLayout><AdminUsers /></AdminLayout>} />
           <Route path="/admin/analytics" element={<AdminLayout><AdminAnalytics /></AdminLayout>} />
+          <Route path="/admin/forum"     element={<AdminLayout><AdminForum /></AdminLayout>} />
           <Route path="/admin/calendar"  element={<AdminLayout><AdminCalendar /></AdminLayout>} />
 
           <Route path="*" element={<Navigate to="/" replace />} />

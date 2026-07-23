@@ -34,7 +34,7 @@ export default function Leaderboard({ maxRows = 10 }) {
             key={l.id}
             className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors
               ${l.id === user?.uid
-                ? 'bg-primary-900/30 border border-primary-800/40'
+                ? 'bg-primary-50 border border-primary-200'
                 : 'hover:bg-slate-100'
               }`}
           >

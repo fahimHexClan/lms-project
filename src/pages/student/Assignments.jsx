@@ -145,6 +145,12 @@ function AssignmentCard({ assignment: a, submission, deadline, isPast, isNear, u
           </div>
           <p className="text-sm text-slate-500 mb-1">{a.module} • {a.marks} marks</p>
           <p className="text-sm text-slate-500">{a.description}</p>
+          {a.briefFileUrl && (
+            <a href={a.briefFileUrl} target="_blank" rel="noreferrer"
+              className="inline-flex items-center gap-1 text-xs text-primary-700 hover:text-primary-800 underline underline-offset-2 mt-2">
+              📎 {a.briefFileName || 'Assignment brief'}
+            </a>
+          )}
         </div>
         <div className="text-right flex-shrink-0">
           <p className="text-xs text-slate-500">Deadline</p>
@@ -161,7 +167,7 @@ function AssignmentCard({ assignment: a, submission, deadline, isPast, isNear, u
             <div>
               <p className="text-xs text-slate-500 mb-1">Your submission</p>
               <a href={submission.fileUrl} target="_blank" rel="noreferrer"
-                className="text-sm text-primary-700 hover:text-primary-300 underline underline-offset-2">
+                className="text-sm text-primary-700 hover:text-primary-800 underline underline-offset-2">
                 {submission.fileName}
               </a>
             </div>

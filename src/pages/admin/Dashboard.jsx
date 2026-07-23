@@ -83,7 +83,7 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            <div className="card border-primary-800/20 bg-primary-900/5">
+            <div className="card border-primary-200 bg-primary-50">
               <h3 className="font-display text-slate-900 font-700 mb-2">⚡ BAGE Engine Status</h3>
               <p className="text-sm text-slate-500 mb-3">
                 Behaviour-Adaptive Gamification Engine is active. Cloud Functions monitor student actions in real-time.

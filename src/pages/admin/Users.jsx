@@ -104,7 +104,7 @@ export default function AdminUsers() {
               key={r}
               onClick={() => setFilter(r)}
               className={`px-4 py-1.5 rounded-xl text-sm font-medium transition-all
-                ${filter === r ? 'bg-primary-600/30 text-primary-300 border border-primary-700/50' : 'text-slate-500 hover:text-slate-600'}`}
+                ${filter === r ? 'bg-primary-50 text-primary-700 border border-primary-200' : 'text-slate-500 hover:text-slate-600'}`}
             >
               {r.charAt(0).toUpperCase() + r.slice(1)}
               <span className="ml-1.5 text-xs opacity-60">
@@ -131,7 +131,7 @@ export default function AdminUsers() {
               </thead>
               <tbody>
                 {filtered.map((u, i) => (
-                  <tr key={u.id} className={`border-b border-slate-200 hover:bg-slate-100/30 transition-colors ${i % 2 === 0 ? '' : 'bg-white/20'}`}>
+                  <tr key={u.id} className={`border-b border-slate-200 hover:bg-slate-50 transition-colors ${i % 2 === 0 ? '' : 'bg-slate-50/50'}`}>
                     <td className="px-5 py-3">
                       <div className="flex items-center gap-2">
                         <div className="w-7 h-7 rounded-full bg-slate-200 flex items-center justify-center text-xs font-600 text-primary-700">
