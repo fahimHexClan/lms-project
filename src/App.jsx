@@ -12,6 +12,7 @@ import StudentAssignments from './pages/student/Assignments'
 import StudentForum      from './pages/student/Forum'
 import StudentCalendar   from './pages/student/Calendar'
 import StudentGamification from './pages/student/Gamification'
+import StudentVideos     from './pages/student/Videos'
 
 // Lecturer pages
 import LecturerDashboard  from './pages/lecturer/Dashboard'
@@ -19,6 +20,7 @@ import LecturerContent    from './pages/lecturer/Content'
 import LecturerAssignments from './pages/lecturer/Assignments'
 import LecturerForum      from './pages/lecturer/Forum'
 import LecturerCalendar   from './pages/lecturer/Calendar'
+import LecturerVideos     from './pages/lecturer/Videos'
 
 // Admin pages
 import AdminDashboard from './pages/admin/Dashboard'
@@ -26,6 +28,8 @@ import AdminUsers     from './pages/admin/Users'
 import AdminAnalytics from './pages/admin/Analytics'
 import AdminCalendar  from './pages/admin/Calendar'
 import AdminForum     from './pages/admin/Forum'
+import AdminVideos    from './pages/admin/Videos'
+import AdminAssignments from './pages/admin/Assignments'
 
 function StudentLayout({ children }) {
   return (
@@ -59,6 +63,7 @@ export default function App() {
           {/* Student routes */}
           <Route path="/student"            element={<StudentLayout><StudentDashboard /></StudentLayout>} />
           <Route path="/student/content"    element={<StudentLayout><StudentContent /></StudentLayout>} />
+          <Route path="/student/videos"     element={<StudentLayout><StudentVideos /></StudentLayout>} />
           <Route path="/student/assignments" element={<StudentLayout><StudentAssignments /></StudentLayout>} />
           <Route path="/student/forum"      element={<StudentLayout><StudentForum /></StudentLayout>} />
           <Route path="/student/calendar"   element={<StudentLayout><StudentCalendar /></StudentLayout>} />
@@ -67,6 +72,7 @@ export default function App() {
           {/* Lecturer routes */}
           <Route path="/lecturer"             element={<LecturerLayout><LecturerDashboard /></LecturerLayout>} />
           <Route path="/lecturer/content"     element={<LecturerLayout><LecturerContent /></LecturerLayout>} />
+          <Route path="/lecturer/videos"      element={<LecturerLayout><LecturerVideos /></LecturerLayout>} />
           <Route path="/lecturer/assignments" element={<LecturerLayout><LecturerAssignments /></LecturerLayout>} />
           <Route path="/lecturer/forum"       element={<LecturerLayout><LecturerForum /></LecturerLayout>} />
           <Route path="/lecturer/calendar"    element={<LecturerLayout><LecturerCalendar /></LecturerLayout>} />
@@ -75,8 +81,10 @@ export default function App() {
           <Route path="/admin"           element={<AdminLayout><AdminDashboard /></AdminLayout>} />
           <Route path="/admin/users"     element={<AdminLayout><AdminUsers /></AdminLayout>} />
           <Route path="/admin/analytics" element={<AdminLayout><AdminAnalytics /></AdminLayout>} />
+          <Route path="/admin/videos"    element={<AdminLayout><AdminVideos /></AdminLayout>} />
           <Route path="/admin/forum"     element={<AdminLayout><AdminForum /></AdminLayout>} />
           <Route path="/admin/calendar"  element={<AdminLayout><AdminCalendar /></AdminLayout>} />
+          <Route path="/admin/assignments" element={<AdminLayout><AdminAssignments /></AdminLayout>} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

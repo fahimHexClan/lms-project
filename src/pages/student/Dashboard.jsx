@@ -5,13 +5,17 @@ import { useAuth } from '../../context/AuthContext'
 import { PageLayout } from '../../components/common/Sidebar'
 import ActiveChallenges from '../../components/bage/ActiveChallenges'
 import Leaderboard from '../../components/bage/Leaderboard'
+import TopPerformers from '../../components/bage/TopPerformers'
 
-function StatCard({ label, value, sub, color = 'text-primary-700' }) {
+function StatCard({ label, value, sub, icon, badge = 'primary', color = 'text-primary-700' }) {
   return (
-    <div className="card-sm">
-      <p className="text-xs text-slate-500 mb-1">{label}</p>
-      <p className={`text-2xl font-display font-700 ${color}`}>{value}</p>
-      {sub && <p className="text-xs text-slate-500 mt-0.5">{sub}</p>}
+    <div className="stat-tile">
+      <div className={`icon-badge-${badge}`}>{icon}</div>
+      <div className="min-w-0">
+        <p className="text-xs text-slate-500 mb-0.5">{label}</p>
+        <p className={`text-xl font-display font-700 ${color} leading-tight`}>{value}</p>
+        {sub && <p className="text-xs text-slate-500 mt-0.5 truncate">{sub}</p>}
+      </div>
     </div>
   )
 }
@@ -21,6 +25,7 @@ export default function StudentDashboard() {
   const [profile, setProfile]           = useState(null)
   const [recentAssignments, setRecent]  = useState([])
   const [pendingCount, setPending]      = useState(0)
+  const [recentGrades, setRecentGrades] = useState([])
 
   useEffect(() => {
     if (!user) return
@@ -53,11 +58,43 @@ export default function StudentDashboard() {
     fetchPending()
   }, [user])
 
-  const streakEmoji = (n) => n >= 7 ? '🔥🔥🔥' : n >= 3 ? '🔥🔥' : n >= 1 ? '🔥' : '—'
+  // Live-update recent grades — this is what shows lecturer feedback the
+  // moment a submission is graded, without the student needing to refresh.
+  useEffect(() => {
+    if (!user) return
+    const q = query(
+      collection(db, 'submissions'),
+      where('studentId', '==', user.uid)
+    )
+    const unsub = onSnapshot(q, async (snap) => {
+      const graded = snap.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .filter(s => s.grade !== null && s.grade !== undefined)
+
+      if (graded.length === 0) { setRecentGrades([]); return }
+
+      // Attach assignment title/marks for display
+      const assignmentIds = [...new Set(graded.map(s => s.assignmentId))]
+      const assignmentSnaps = await Promise.all(
+        assignmentIds.map(id => getDocs(query(collection(db, 'assignments'), where('__name__', '==', id))))
+      )
+      const assignmentMap = {}
+      assignmentSnaps.forEach(s => s.docs.forEach(d => { assignmentMap[d.id] = d.data() }))
+
+      const withDetails = graded
+        .map(s => ({ ...s, assignment: assignmentMap[s.assignmentId] }))
+        .sort((a, b) => (b.gradedAt?.toMillis?.() || 0) - (a.gradedAt?.toMillis?.() || 0))
+        .slice(0, 5)
+
+      setRecentGrades(withDetails)
+    })
+    return unsub
+  }, [user])
+
 
   return (
     <PageLayout>
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-6xl">
         {/* Header */}
         <div className="mb-8">
           <h1 className="font-display text-3xl font-700 text-slate-900">
@@ -69,24 +106,28 @@ export default function StudentDashboard() {
         {/* Stats row */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <StatCard
+            icon="⭐" badge="accent"
             label="Total Points"
             value={(profile?.points || 0).toLocaleString()}
             sub="Keep earning!"
             color="text-accent-700"
           />
           <StatCard
+            icon="🔥" badge="red"
             label="Login Streak"
-            value={streakEmoji(profile?.loginStreak || 0)}
-            sub={`${profile?.loginStreak || 0} days`}
+            value={profile?.loginStreak || 0}
+            sub={`${profile?.loginStreak || 0} day streak`}
             color="text-orange-600"
           />
           <StatCard
+            icon="🏅" badge="purple"
             label="Badges Earned"
             value={profile?.badges?.length || 0}
             sub="Achievements"
             color="text-accent-700"
           />
           <StatCard
+            icon={pendingCount > 0 ? '⏰' : '✅'} badge={pendingCount > 0 ? 'red' : 'green'}
             label="Pending"
             value={pendingCount}
             sub="assignments due"
@@ -98,6 +139,26 @@ export default function StudentDashboard() {
         <div className="mb-6">
           <ActiveChallenges />
         </div>
+
+        {/* Recent grades */}
+        {recentGrades.length > 0 && (
+          <div className="card mb-6">
+            <h3 className="font-display text-slate-900 font-700 mb-4">📝 Recent Grades</h3>
+            <div className="space-y-2">
+              {recentGrades.map(g => (
+                <div key={g.id} className="flex items-center gap-3 p-3 rounded-xl bg-slate-100">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-slate-700 truncate">{g.assignment?.title || 'Assignment'}</p>
+                    {g.feedback && <p className="text-xs text-slate-500 mt-0.5 truncate">{g.feedback}</p>}
+                  </div>
+                  <span className="font-display font-700 text-accent-700 text-lg flex-shrink-0">
+                    {g.grade}/{g.assignment?.marks ?? '—'}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* 2-col grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -131,9 +192,10 @@ export default function StudentDashboard() {
             )}
           </div>
 
-          {/* Leaderboard mini */}
-          <div>
+          {/* Leaderboard mini + Top Performers */}
+          <div className="space-y-6">
             <Leaderboard maxRows={5} />
+            <TopPerformers />
           </div>
         </div>
       </div>

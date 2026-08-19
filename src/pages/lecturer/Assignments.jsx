@@ -1,29 +1,47 @@
 import { useEffect, useState } from 'react'
 import {
   collection, query, orderBy, onSnapshot, addDoc, serverTimestamp,
-  doc, updateDoc, getDocs, where
+  doc, updateDoc, getDocs, where, deleteDoc
 } from 'firebase/firestore'
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
+import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage'
 import { db, storage } from '../../services/firebase'
 import { useAuth } from '../../context/AuthContext'
+import { useLookups } from '../../hooks/useLookups'
 import { PageLayout } from '../../components/common/Sidebar'
 import toast from 'react-hot-toast'
 
+const emptyForm = { title: '', module: '', batch: '', description: '', deadline: '', marks: 100 }
+
 export default function LecturerAssignments() {
   const { user } = useAuth()
+  const { batches, coursesForBatch } = useLookups()
   const [assignments, setAssignments] = useState([])
+  const [studentMap, setStudentMap]   = useState({}) // uid -> { displayName, email }
   const [submissions, setSubmissions] = useState([])
   const [selected, setSelected]       = useState(null) // assignment being graded
   const [showForm, setShowForm]       = useState(false)
-  const [form, setForm] = useState({ title: '', module: '', description: '', deadline: '', marks: 100 })
+  const [editingId, setEditingId]     = useState(null) // assignment id being edited, null = creating new
+  const [form, setForm]               = useState(emptyForm)
   const [briefFile, setBriefFile]     = useState(null)
   const [creating, setCreating]       = useState(false)
   const [gradingId, setGradingId]     = useState(null)
   const [gradeInputs, setGradeInputs] = useState({}) // { subId: { grade, feedback } }
+  const [groupFilter, setGroupFilter] = useState('all')
 
   useEffect(() => {
     const q = query(collection(db, 'assignments'), orderBy('deadline', 'asc'))
     return onSnapshot(q, snap => setAssignments(snap.docs.map(d => ({ id: d.id, ...d.data() }))))
+  }, [])
+
+  // Load all student names once — used to show real names instead of raw uids
+  useEffect(() => {
+    const loadStudents = async () => {
+      const snap = await getDocs(query(collection(db, 'users'), where('role', '==', 'student')))
+      const map = {}
+      snap.docs.forEach(d => { map[d.id] = d.data() })
+      setStudentMap(map)
+    }
+    loadStudents()
   }, [])
 
   const loadSubmissions = async (assignmentId) => {
@@ -34,11 +52,42 @@ export default function LecturerAssignments() {
     setSelected(assignmentId)
   }
 
-  const createAssignment = async (e) => {
+  const resetForm = () => {
+    setForm(emptyForm)
+    setBriefFile(null)
+    setEditingId(null)
+    setShowForm(false)
+  }
+
+  const startCreate = () => {
+    resetForm()
+    setShowForm(true)
+  }
+
+  const startEdit = (a) => {
+    const deadline = a.deadline?.toDate?.() || new Date(a.deadline)
+    // Format for datetime-local input: YYYY-MM-DDTHH:mm
+    const pad = (n) => String(n).padStart(2, '0')
+    const localValue = `${deadline.getFullYear()}-${pad(deadline.getMonth() + 1)}-${pad(deadline.getDate())}T${pad(deadline.getHours())}:${pad(deadline.getMinutes())}`
+    setForm({
+      title: a.title || '',
+      module: a.module || '',
+      batch: a.batch || '',
+      description: a.description || '',
+      deadline: localValue,
+      marks: a.marks || 100,
+    })
+    setBriefFile(null)
+    setEditingId(a.id)
+    setShowForm(true)
+    setSelected(null)
+  }
+
+  const saveAssignment = async (e) => {
     e.preventDefault()
     setCreating(true)
     try {
-      let briefFileUrl = null, briefFileName = null, briefStoragePath = null
+      let briefFileUrl, briefFileName, briefStoragePath
       if (briefFile) {
         const path = `assignments/${user.uid}/${Date.now()}_${briefFile.name}`
         const snap = await uploadBytes(ref(storage, path), briefFile)
@@ -47,24 +96,44 @@ export default function LecturerAssignments() {
         briefStoragePath = path
       }
 
-      await addDoc(collection(db, 'assignments'), {
-        title:       form.title.trim(),
-        module:      form.module.trim(),
-        description: form.description.trim(),
-        deadline:    new Date(form.deadline),
-        marks:       Number(form.marks),
-        briefFileUrl,
-        briefFileName,
-        briefStoragePath,
-        createdBy:   user.uid,
-        createdAt:   serverTimestamp(),
-      })
-      setForm({ title: '', module: '', description: '', deadline: '', marks: 100 })
-      setBriefFile(null)
-      setShowForm(false)
-      toast.success('Assignment created!')
-    } catch {
-      toast.error('Failed to create assignment.')
+      if (editingId) {
+        // Update existing assignment — only overwrite brief file fields if a new one was chosen
+        const updates = {
+          title:       form.title.trim(),
+          module:      form.module.trim(),
+          batch:       form.batch.trim(),
+          description: form.description.trim(),
+          deadline:    new Date(form.deadline),
+          marks:       Number(form.marks),
+          updatedAt:   serverTimestamp(),
+        }
+        if (briefFile) {
+          updates.briefFileUrl     = briefFileUrl
+          updates.briefFileName    = briefFileName
+          updates.briefStoragePath = briefStoragePath
+        }
+        await updateDoc(doc(db, 'assignments', editingId), updates)
+        toast.success('Assignment updated!')
+      } else {
+        await addDoc(collection(db, 'assignments'), {
+          title:       form.title.trim(),
+          module:      form.module.trim(),
+          batch:       form.batch.trim(),
+          description: form.description.trim(),
+          deadline:    new Date(form.deadline),
+          marks:       Number(form.marks),
+          briefFileUrl:     briefFileUrl     || null,
+          briefFileName:    briefFileName    || null,
+          briefStoragePath: briefStoragePath || null,
+          createdBy:   user.uid,
+          createdAt:   serverTimestamp(),
+        })
+        toast.success('Assignment created!')
+      }
+      resetForm()
+    } catch (err) {
+      toast.error(editingId ? 'Failed to update assignment.' : 'Failed to create assignment.')
+      console.error(err)
     } finally {
       setCreating(false)
     }
@@ -91,23 +160,44 @@ export default function LecturerAssignments() {
     }
   }
 
+  const deleteAssignment = async (a) => {
+    if (!confirm(`Delete "${a.title}"? Student submissions for it will remain but become orphaned.`)) return
+    try {
+      if (a.briefStoragePath) {
+        try { await deleteObject(ref(storage, a.briefStoragePath)) } catch { /* file may already be gone */ }
+      }
+      await deleteDoc(doc(db, 'assignments', a.id))
+      if (selected === a.id) { setSelected(null); setSubmissions([]) }
+      toast.success('Assignment deleted.')
+    } catch {
+      toast.error('Failed to delete assignment.')
+    }
+  }
+
   const selectedAssignment = assignments.find(a => a.id === selected)
+  const studentLabel = (uid) => studentMap[uid]?.displayName || studentMap[uid]?.email || `${uid?.slice(0, 12)}…`
+
+  const groupKey = (a) => `${a.batch || 'All Batches'} · ${a.module || 'All Courses'}`
+  const groupKeys = ['all', ...new Set(assignments.map(groupKey))]
+  const visibleAssignments = groupFilter === 'all' ? assignments : assignments.filter(a => groupKey(a) === groupFilter)
 
   return (
     <PageLayout>
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-6xl">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="font-display text-3xl font-700 text-slate-900">Assignments</h1>
             <p className="text-slate-500 mt-1">Create assignments and grade student submissions.</p>
           </div>
-          <button onClick={() => setShowForm(f => !f)} className="btn-primary">+ New Assignment</button>
+          <button onClick={startCreate} className="btn-primary">+ New Assignment</button>
         </div>
 
-        {/* Create form */}
+        {/* Create / Edit form */}
         {showForm && (
-          <form onSubmit={createAssignment} className="card mb-6 animate-slide-up">
-            <h3 className="font-medium text-slate-900 mb-4">Create new assignment</h3>
+          <form onSubmit={saveAssignment} className="card mb-6 animate-slide-up">
+            <h3 className="font-medium text-slate-900 mb-4">
+              {editingId ? 'Edit assignment' : 'Create new assignment'}
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
                 <label className="label">Title *</label>
@@ -115,9 +205,20 @@ export default function LecturerAssignments() {
                   value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} required />
               </div>
               <div>
+                <label className="label">Batch <span className="text-slate-400 font-normal">(blank = everyone)</span></label>
+                <select className="input" value={form.batch}
+                  onChange={e => setForm(f => ({ ...f, batch: e.target.value, module: '' }))}>
+                  <option value="">— Everyone —</option>
+                  {batches.map(b => <option key={b.id} value={b.name}>{b.name}</option>)}
+                </select>
+              </div>
+              <div>
                 <label className="label">Module</label>
-                <input className="input" placeholder="e.g. COM6301"
-                  value={form.module} onChange={e => setForm(f => ({ ...f, module: e.target.value }))} />
+                <select className="input" value={form.module}
+                  onChange={e => setForm(f => ({ ...f, module: e.target.value }))}>
+                  <option value="">— Everyone —</option>
+                  {coursesForBatch(form.batch).map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                </select>
               </div>
               <div>
                 <label className="label">Deadline *</label>
@@ -136,17 +237,24 @@ export default function LecturerAssignments() {
                 value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
             </div>
             <div className="mb-4">
-              <label className="label">Attach brief / instructions file (optional)</label>
+              <label className="label">
+                {editingId ? 'Replace brief / instructions file (optional)' : 'Attach brief / instructions file (optional)'}
+              </label>
               <input type="file" accept=".pdf,.doc,.docx,.ppt,.pptx"
                 className="block text-sm text-slate-500 file:mr-3 file:btn-secondary file:border-0 file:text-xs file:cursor-pointer"
                 onChange={e => setBriefFile(e.target.files[0])} />
               {briefFile && <p className="text-xs text-slate-500 mt-1">📎 {briefFile.name} ({(briefFile.size / 1024).toFixed(0)} KB)</p>}
+              {editingId && !briefFile && (
+                <p className="text-xs text-slate-500 mt-1">Leave empty to keep the current file.</p>
+              )}
             </div>
             <div className="flex gap-2">
               <button type="submit" disabled={creating} className="btn-primary flex items-center gap-2">
-                {creating ? <><span className="animate-spin h-3 w-3 border-2 border-white border-t-transparent rounded-full" /> Creating…</> : 'Create Assignment'}
+                {creating
+                  ? <><span className="animate-spin h-3 w-3 border-2 border-white border-t-transparent rounded-full" /> {editingId ? 'Saving…' : 'Creating…'}</>
+                  : (editingId ? 'Save Changes' : 'Create Assignment')}
               </button>
-              <button type="button" onClick={() => setShowForm(false)} className="btn-secondary">Cancel</button>
+              <button type="button" onClick={resetForm} className="btn-secondary">Cancel</button>
             </div>
           </form>
         )}
@@ -154,27 +262,46 @@ export default function LecturerAssignments() {
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
           {/* Assignment list */}
           <div className="lg:col-span-2 space-y-2">
-            {assignments.map(a => {
+            <div className="flex items-center gap-2 mb-1">
+              <label className="text-sm text-slate-500">View:</label>
+              <select className="input w-auto text-sm" value={groupFilter} onChange={e => setGroupFilter(e.target.value)}>
+                {groupKeys.map(k => <option key={k} value={k}>{k === 'all' ? 'All batches & courses' : k}</option>)}
+              </select>
+            </div>
+            {visibleAssignments.map(a => {
               const deadline = a.deadline?.toDate?.() || new Date(a.deadline)
               const isPast   = deadline < new Date()
               return (
-                <button
+                <div
                   key={a.id}
-                  onClick={() => loadSubmissions(a.id)}
                   className={`w-full text-left p-4 rounded-xl border transition-all
                     ${selected === a.id
                       ? 'border-primary-600 bg-primary-50'
                       : 'border-slate-200 bg-white hover:border-slate-300'}`}
                 >
-                  <p className="text-sm font-medium text-slate-700 mb-1">{a.title}</p>
-                  <p className="text-xs text-slate-500">{a.module} • {a.marks} marks {a.briefFileUrl ? '• 📎 brief attached' : ''}</p>
-                  <p className={`text-xs mt-1 ${isPast ? 'text-red-600' : 'text-slate-500'}`}>
-                    {isPast ? '⏰ Closed' : '🟢 Open'} · {deadline.toLocaleDateString()}
-                  </p>
-                </button>
+                  <button onClick={() => loadSubmissions(a.id)} className="w-full text-left">
+                    <p className="text-sm font-medium text-slate-700 mb-1">{a.title}</p>
+                    <p className="text-xs text-slate-500">{a.module}{a.batch ? ` • ${a.batch}` : ''} • {a.marks} marks {a.briefFileUrl ? '• 📎 brief attached' : ''}</p>
+                    <p className={`text-xs mt-1 ${isPast ? 'text-red-600' : 'text-slate-500'}`}>
+                      {isPast ? '⏰ Closed' : '🟢 Open'} · {deadline.toLocaleDateString()}
+                    </p>
+                  </button>
+                  <button
+                    onClick={() => startEdit(a)}
+                    className="text-xs text-primary-700 hover:text-primary-800 underline underline-offset-2 mt-2"
+                  >
+                    ✏️ Edit
+                  </button>
+                  <button
+                    onClick={() => deleteAssignment(a)}
+                    className="text-xs text-red-600 hover:text-red-700 underline underline-offset-2 mt-2 ml-3"
+                  >
+                    🗑️ Delete
+                  </button>
+                </div>
               )
             })}
-            {assignments.length === 0 && (
+            {visibleAssignments.length === 0 && (
               <div className="text-center py-12 text-slate-500">
                 <p className="text-3xl mb-2">📋</p>
                 <p className="text-sm">No assignments yet</p>
@@ -200,7 +327,7 @@ export default function LecturerAssignments() {
                       <div key={sub.id} className="border border-slate-200 rounded-xl p-4 bg-slate-50">
                         <div className="flex items-center justify-between mb-3">
                           <div>
-                            <p className="text-sm text-slate-600">{sub.studentId?.slice(0, 12)}…</p>
+                            <p className="text-sm font-medium text-slate-700">{studentLabel(sub.studentId)}</p>
                             <div className="flex items-center gap-2 mt-1">
                               <span className={`badge ${sub.isOnTime ? 'badge-green' : 'badge-amber'}`}>
                                 {sub.isOnTime ? '✓ On time' : '⚠ Late'}

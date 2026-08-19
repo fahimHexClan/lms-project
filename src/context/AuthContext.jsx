@@ -65,7 +65,7 @@ export function AuthProvider({ children }) {
   // Firebase client-SDK behaviour). To avoid hijacking the admin's session,
   // we spin up a short-lived secondary Firebase app just for this call, then
   // tear it down — the admin's own `auth` session is never touched.
-  const register = async (email, password, role, displayName) => {
+  const register = async (email, password, role, displayName, batch = '', module = '') => {
     const secondaryApp  = initializeApp(firebaseConfig, `secondary-${Date.now()}`)
     const secondaryAuth = getAuth(secondaryApp)
     try {
@@ -76,6 +76,8 @@ export function AuthProvider({ children }) {
         email,
         displayName,
         role,           // 'student' | 'lecturer' | 'admin'
+        batch:  batch.trim(),   // e.g. "Cohort 8" — used to target content/assignments/events
+        module: module.trim(),  // e.g. "COM6301"  — used to target content/assignments/events
         points: 0,
         badges: [],
         loginStreak: 0,

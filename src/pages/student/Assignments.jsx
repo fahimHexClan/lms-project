@@ -8,9 +8,15 @@ import toast from 'react-hot-toast'
 
 export default function StudentAssignments() {
   const { user } = useAuth()
+  const [profile, setProfile]           = useState(null)
   const [assignments, setAssignments]   = useState([])
   const [submissions, setSubmissions]   = useState({})
   const [uploading, setUploading]       = useState(null)
+
+  useEffect(() => {
+    if (!user) return
+    return onSnapshot(doc(db, 'users', user.uid), s => s.exists() && setProfile(s.data()))
+  }, [user])
 
   useEffect(() => {
     const q = query(collection(db, 'assignments'), orderBy('deadline', 'asc'))
@@ -30,6 +36,17 @@ export default function StudentAssignments() {
     })
     return unsub
   }, [user])
+
+  // Visibility rule: batch + module are treated as ONE combined unit.
+  // - Both blank on the assignment -> true campus-wide broadcast
+  // - Both set -> must match the student's own batch AND module exactly
+  // - Only one set (legacy/partial data) -> hidden, avoids leaking across
+  //   the other dimension (e.g. a Batch-only tag leaking across courses)
+  const visibleToMe = (a) => {
+    const bothBlank = !a.batch && !a.module
+    const bothMatch = a.batch === profile?.batch && a.module === profile?.module
+    return bothBlank || bothMatch
+  }
 
   const handleSubmit = async (assignment, file) => {
     if (!file) return
@@ -88,14 +105,14 @@ export default function StudentAssignments() {
 
   return (
     <PageLayout>
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl">
         <div className="mb-8">
           <h1 className="font-display text-3xl font-700 text-slate-900">Assignments</h1>
           <p className="text-slate-500 mt-1">Submit your coursework and view feedback.</p>
         </div>
 
         <div className="space-y-4">
-          {assignments.map(a => {
+          {assignments.filter(visibleToMe).map(a => {
             const sub      = submissions[a.id]
             const deadline = a.deadline?.toDate?.() || new Date(a.deadline)
             const isPast   = deadline < new Date()
@@ -114,7 +131,7 @@ export default function StudentAssignments() {
               />
             )
           })}
-          {assignments.length === 0 && (
+          {assignments.filter(visibleToMe).length === 0 && (
             <div className="text-center py-20 text-slate-500">
               <p className="text-4xl mb-3">📋</p>
               <p>No assignments yet</p>
@@ -143,7 +160,7 @@ function AssignmentCard({ assignment: a, submission, deadline, isPast, isNear, u
             {!submission && isPast && <span className="badge badge-red">❌ Missed</span>}
             {!submission && isNear && <span className="badge badge-amber">⏰ Due soon</span>}
           </div>
-          <p className="text-sm text-slate-500 mb-1">{a.module} • {a.marks} marks</p>
+          <p className="text-sm text-slate-500 mb-1">{a.module}{a.batch ? ` • ${a.batch}` : ''} • {a.marks} marks</p>
           <p className="text-sm text-slate-500">{a.description}</p>
           {a.briefFileUrl && (
             <a href={a.briefFileUrl} target="_blank" rel="noreferrer"

@@ -4,6 +4,7 @@ import { db } from '../../services/firebase'
 import { useAuth } from '../../context/AuthContext'
 import { PageLayout } from '../../components/common/Sidebar'
 import Leaderboard from '../../components/bage/Leaderboard'
+import TopPerformers from '../../components/bage/TopPerformers'
 
 const ALL_BADGES = [
   { name: 'On-Track',       emoji: '📋', desc: 'Submitted 2 assignments before deadline after being late.' },
@@ -46,7 +47,7 @@ export default function StudentGamification() {
 
   return (
     <PageLayout>
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-5xl">
         <div className="mb-8">
           <h1 className="font-display text-3xl font-700 text-slate-900">Achievements</h1>
           <p className="text-slate-500 mt-1">Your gamification progress and BAGE challenge history.</p>
@@ -125,15 +126,21 @@ export default function StudentGamification() {
                   return (
                     <div
                       key={b.name}
-                      className={`rounded-xl p-3 text-center border transition-all ${
+                      className={`rounded-xl p-3 text-center border transition-all relative ${
                         earned
-                          ? 'border-primary-300 bg-primary-50'
-                          : 'border-slate-200 bg-slate-50 opacity-40 grayscale'
+                          ? 'border-accent-300 bg-gradient-to-br from-accent-50 to-primary-50 shadow-card'
+                          : 'border-slate-200 bg-slate-50'
                       }`}
                     >
-                      <span className="text-3xl block mb-1">{b.emoji}</span>
-                      <p className="text-xs font-medium text-slate-700">{b.name}</p>
-                      {earned && <p className="text-xs text-slate-500 mt-0.5 leading-tight">{b.desc}</p>}
+                      {earned && (
+                        <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-emerald-500 text-white text-[10px] flex items-center justify-center shadow-sm">✓</span>
+                      )}
+                      <span className={`text-3xl block mb-1 ${earned ? '' : 'grayscale opacity-50'}`}>{b.emoji}</span>
+                      <p className={`text-xs font-600 ${earned ? 'text-slate-900' : 'text-slate-500'}`}>{b.name}</p>
+                      <p className={`text-[11px] mt-1 leading-tight ${earned ? 'text-slate-600' : 'text-slate-400'}`}>
+                        {earned ? b.desc : b.desc}
+                      </p>
+                      {!earned && <span className="inline-block mt-1.5 text-[10px] text-slate-400">🔒 Locked</span>}
                     </div>
                   )
                 })}
@@ -161,8 +168,9 @@ export default function StudentGamification() {
           </div>
 
           {/* Sidebar: full leaderboard */}
-          <div>
+          <div className="space-y-6">
             <Leaderboard maxRows={15} />
+            <TopPerformers />
           </div>
         </div>
       </div>

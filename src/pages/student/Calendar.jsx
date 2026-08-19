@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import { collection, query, orderBy, onSnapshot } from 'firebase/firestore'
+import { collection, query, orderBy, onSnapshot, doc } from 'firebase/firestore'
 import { db } from '../../services/firebase'
+import { useAuth } from '../../context/AuthContext'
 import { PageLayout } from '../../components/common/Sidebar'
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isToday, isSameMonth } from 'date-fns'
 
@@ -13,14 +14,32 @@ const typeColors = {
 }
 
 export default function StudentCalendar() {
-  const [events, setEvents]   = useState([])
+  const { user } = useAuth()
+  const [profile, setProfile] = useState(null)
+  const [allEvents, setAllEvents] = useState([])
   const [current, setCurrent] = useState(new Date())
   const [selected, setSelected] = useState(null)
 
   useEffect(() => {
+    if (!user) return
+    return onSnapshot(doc(db, 'users', user.uid), s => s.exists() && setProfile(s.data()))
+  }, [user])
+
+  useEffect(() => {
     const q = query(collection(db, 'events'), orderBy('date', 'asc'))
-    return onSnapshot(q, snap => setEvents(snap.docs.map(d => ({ id: d.id, ...d.data() }))))
+    return onSnapshot(q, snap => setAllEvents(snap.docs.map(d => ({ id: d.id, ...d.data() }))))
   }, [])
+
+  // Visibility rule: batch + module are treated as ONE combined unit.
+  // - Both blank on the event -> true campus-wide broadcast
+  // - Both set -> must match the student's own batch AND module exactly
+  // - Only one set (legacy/partial data) -> hidden, avoids leaking across
+  //   the other dimension
+  const events = allEvents.filter(e => {
+    const bothBlank = !e.batch && !e.module
+    const bothMatch = e.batch === profile?.batch && e.module === profile?.module
+    return bothBlank || bothMatch
+  })
 
   const days = eachDayOfInterval({ start: startOfMonth(current), end: endOfMonth(current) })
   const selectedEvents = selected
@@ -38,7 +57,7 @@ export default function StudentCalendar() {
 
   return (
     <PageLayout>
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-5xl">
         <div className="mb-8">
           <h1 className="font-display text-3xl font-700 text-slate-900">Academic Calendar</h1>
           <p className="text-slate-500 mt-1">All lectures, deadlines, and events in one place.</p>

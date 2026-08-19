@@ -8,12 +8,6 @@ const admin = require('firebase-admin')
 
 const db = admin.firestore()
 
-exports.onUserCreated = require('firebase-functions/v2/identity')
-  .beforeUserCreated(async (event) => {
-    console.log(`[AUTH] New user created: ${event.data.uid}`)
-    return
-  })
-
 /**
  * updateLoginStreak — HTTPS Callable
  * Client calls this once per session (from AuthContext, right after sign-in).

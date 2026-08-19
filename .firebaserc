@@ -1,5 +1,15 @@
 {
   "projects": {
     "default": "educore-lms-ae316"
-  }
+  },
+  "targets": {
+    "educore-lms-ae316": {
+      "hosting": {
+        "main": [
+          "sfdigitalsolutionslK-lms"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }

@@ -11,7 +11,6 @@ exports.weeklyBehaviourReset = bage.weeklyBehaviourReset
 
 // Export auth trigger
 const auth = require('./auth')
-exports.onUserCreated     = auth.onUserCreated
 exports.updateLoginStreak = auth.updateLoginStreak
 
 // Export analytics

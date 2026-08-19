@@ -5,6 +5,7 @@ import {
 } from 'firebase/firestore'
 import { db } from '../../services/firebase'
 import { useAuth } from '../../context/AuthContext'
+import { useLookups } from '../../hooks/useLookups'
 import { PageLayout } from '../../components/common/Sidebar'
 import {
   format, startOfMonth, endOfMonth, eachDayOfInterval,
@@ -23,11 +24,12 @@ const typeColors = {
 
 export default function LecturerCalendar() {
   const { user } = useAuth()
+  const { batches, coursesForBatch } = useLookups()
   const [events, setEvents]     = useState([])
   const [current, setCurrent]   = useState(new Date())
   const [selected, setSelected] = useState(null)
   const [showForm, setShowForm] = useState(false)
-  const [form, setForm] = useState({ title: '', type: 'lecture', time: '', description: '' })
+  const [form, setForm] = useState({ title: '', type: 'lecture', time: '', description: '', module: '', batch: '' })
   const [saving, setSaving]     = useState(false)
 
   useEffect(() => {
@@ -50,11 +52,13 @@ export default function LecturerCalendar() {
         type:        form.type,
         time:        form.time,
         description: form.description.trim(),
+        module:      form.module.trim(),
+        batch:       form.batch.trim(),
         date:        selected,
         createdBy:   user.uid,
         createdAt:   serverTimestamp(),
       })
-      setForm({ title: '', type: 'lecture', time: '', description: '' })
+      setForm({ title: '', type: 'lecture', time: '', description: '', module: '', batch: '' })
       setShowForm(false)
       toast.success('Event created!')
     } catch {
@@ -74,7 +78,7 @@ export default function LecturerCalendar() {
 
   return (
     <PageLayout>
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-5xl">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="font-display text-3xl font-700 text-slate-900">Academic Calendar</h1>
@@ -113,6 +117,22 @@ export default function LecturerCalendar() {
                 <label className="label">Description</label>
                 <input className="input" placeholder="Optional notes"
                   value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
+              </div>
+              <div>
+                <label className="label">Batch <span className="text-slate-400 font-normal">(blank = everyone)</span></label>
+                <select className="input" value={form.batch}
+                  onChange={e => setForm(f => ({ ...f, batch: e.target.value, module: '' }))}>
+                  <option value="">— Everyone —</option>
+                  {batches.map(b => <option key={b.id} value={b.name}>{b.name}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="label">Module <span className="text-slate-400 font-normal">(optional)</span></label>
+                <select className="input" value={form.module}
+                  onChange={e => setForm(f => ({ ...f, module: e.target.value }))}>
+                  <option value="">— Everyone —</option>
+                  {coursesForBatch(form.batch).map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                </select>
               </div>
             </div>
             <div className="flex gap-2">
@@ -186,6 +206,8 @@ export default function LecturerCalendar() {
                       {ev.time && <p className="text-xs opacity-70 mt-0.5">🕐 {ev.time}</p>}
                       {ev.description && <p className="text-xs opacity-70 mt-1">{ev.description}</p>}
                       <span className="badge mt-2 bg-white/60 text-current border-current/20 text-xs">{ev.type}</span>
+                      {ev.module && <span className="badge badge-blue mt-2 ml-1 text-xs">{ev.module}</span>}
+                      {ev.batch && <span className="badge badge-amber mt-2 ml-1 text-xs">{ev.batch}</span>}
                     </div>
                     <button onClick={() => deleteEvent(ev)} className="text-xs text-red-600 hover:text-red-700 ml-2">✕</button>
                   </div>

@@ -1,13 +1,21 @@
 import { useEffect, useState } from 'react'
-import { collection, query, orderBy, onSnapshot, getDocs } from 'firebase/firestore'
+import { collection, query, orderBy, onSnapshot, doc } from 'firebase/firestore'
 import { ref, getDownloadURL } from 'firebase/storage'
 import { db, storage } from '../../services/firebase'
+import { useAuth } from '../../context/AuthContext'
 import { PageLayout } from '../../components/common/Sidebar'
 
 export default function StudentContent() {
+  const { user } = useAuth()
+  const [profile, setProfile]     = useState(null)
   const [materials, setMaterials] = useState([])
   const [search, setSearch]       = useState('')
   const [loading, setLoading]     = useState(true)
+
+  useEffect(() => {
+    if (!user) return
+    return onSnapshot(doc(db, 'users', user.uid), s => s.exists() && setProfile(s.data()))
+  }, [user])
 
   useEffect(() => {
     const q = query(collection(db, 'materials'), orderBy('uploadedAt', 'desc'))
@@ -18,14 +26,27 @@ export default function StudentContent() {
     return unsub
   }, [])
 
+  // Visibility rule: batch + module are treated as ONE combined unit.
+  // - Both blank on the item  -> true campus-wide broadcast, everyone sees it
+  // - Both set                -> must match the student's own batch AND module exactly
+  // - Only one set (legacy/partial data) -> hidden, to avoid leaking across
+  //   the other dimension (e.g. a Batch-only tag leaking across courses)
+  const visibleToMe = (m) => {
+    const bothBlank = !m.batch && !m.module
+    const bothMatch = m.batch === profile?.batch && m.module === profile?.module
+    return bothBlank || bothMatch
+  }
+
   const filtered = materials.filter(m =>
-    m.title?.toLowerCase().includes(search.toLowerCase()) ||
-    m.module?.toLowerCase().includes(search.toLowerCase())
+    visibleToMe(m) && (
+      m.title?.toLowerCase().includes(search.toLowerCase()) ||
+      m.module?.toLowerCase().includes(search.toLowerCase())
+    )
   )
 
   return (
     <PageLayout>
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-5xl">
         <div className="mb-8">
           <h1 className="font-display text-3xl font-700 text-slate-900">Content Library</h1>
           <p className="text-slate-500 mt-1">Access all your lecture materials and resources.</p>
@@ -78,7 +99,10 @@ function MaterialCard({ material: m }) {
         <div className="w-10 h-10 rounded-xl bg-primary-50 border border-primary-200 flex items-center justify-center flex-shrink-0">
           <span className="text-lg">{isPDF ? '📄' : '📊'}</span>
         </div>
-        <span className="badge badge-blue">{m.module || 'General'}</span>
+        <div className="flex flex-wrap gap-1 justify-end">
+          <span className="badge badge-blue">{m.module || 'General'}</span>
+          {m.batch && <span className="badge badge-amber">{m.batch}</span>}
+        </div>
       </div>
       <h3 className="font-medium text-slate-700 text-sm mb-1 line-clamp-2">{m.title}</h3>
       {m.description && (

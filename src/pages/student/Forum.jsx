@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
 import {
   collection, query, orderBy, onSnapshot,
-  addDoc, serverTimestamp, doc, updateDoc, increment, where, getDocs
+  addDoc, serverTimestamp, doc, updateDoc, increment, where
 } from 'firebase/firestore'
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { db, storage } from '../../services/firebase'
 import { useAuth } from '../../context/AuthContext'
+import { useLookups } from '../../hooks/useLookups'
 import { PageLayout } from '../../components/common/Sidebar'
 import { formatDistanceToNow } from 'date-fns'
 import toast from 'react-hot-toast'
@@ -19,21 +20,31 @@ const roleAvatar = {
 
 export default function ForumPage() {
   const { user, role } = useAuth()
-  const [threads, setThreads]         = useState([])
+  const { batches, coursesForBatch } = useLookups()
+  const [profile, setProfile]         = useState(null)
+  const [allThreads, setAllThreads]   = useState([])
   const [selected, setSelected]       = useState(null)
   const [replies, setReplies]         = useState([])
   const [newTitle, setNewTitle]       = useState('')
   const [newBody, setNewBody]         = useState('')
   const [newFile, setNewFile]         = useState(null)
+  const [newModule, setNewModule]     = useState('')
+  const [newBatch, setNewBatch]       = useState('')
   const [replyBody, setReplyBody]     = useState('')
   const [replyFile, setReplyFile]     = useState(null)
   const [showForm, setShowForm]       = useState(false)
   const [submitting, setSubmitting]   = useState(false)
 
+  // Own profile — used for real display name + batch/module visibility filter
+  useEffect(() => {
+    if (!user) return
+    return onSnapshot(doc(db, 'users', user.uid), s => s.exists() && setProfile(s.data()))
+  }, [user])
+
   // Load threads
   useEffect(() => {
     const q = query(collection(db, 'forumThreads'), orderBy('createdAt', 'desc'))
-    return onSnapshot(q, snap => setThreads(snap.docs.map(d => ({ id: d.id, ...d.data() }))))
+    return onSnapshot(q, snap => setAllThreads(snap.docs.map(d => ({ id: d.id, ...d.data() }))))
   }, [])
 
   // Load replies for selected thread
@@ -46,6 +57,21 @@ export default function ForumPage() {
     )
     return onSnapshot(q, snap => setReplies(snap.docs.map(d => ({ id: d.id, ...d.data() }))))
   }, [selected])
+
+  // Visibility rule for students: batch + module are treated as ONE
+  // combined unit.
+  // - Both blank on the thread -> true campus-wide broadcast
+  // - Both set -> must match the student's own batch AND module exactly
+  // - Only one set (legacy/partial data) -> hidden, avoids leaking across
+  //   the other dimension
+  // Lecturers and admins always see every thread, since they oversee all
+  // cohorts/courses.
+  const threads = allThreads.filter(t => {
+    if (role !== 'student') return true
+    const bothBlank = !t.batch && !t.module
+    const bothMatch = t.batch === profile?.batch && t.module === profile?.module
+    return bothBlank || bothMatch
+  })
 
   const uploadAttachment = async (file, folder) => {
     const path = `forum/${folder}/${user.uid}/${Date.now()}_${file.name}`
@@ -67,7 +93,10 @@ export default function ForumPage() {
         body:          newBody.trim(),
         authorId:      user.uid,
         authorEmail:   user.email,
+        authorName:    profile?.displayName || user.email,
         role,
+        module:        newModule,
+        batch:         newBatch,
         replyCount:    0,
         fileUrl:       attachment.fileUrl     || null,
         fileName:      attachment.fileName    || null,
@@ -76,9 +105,10 @@ export default function ForumPage() {
       })
       // Award points + update behaviour
       await updateDoc(doc(db, 'users', user.uid), { points: increment(5) })
-      if (role === 'student') {
+           if (role === 'student') {
         await updateDoc(doc(db, 'userBehaviour', user.uid), {
           forumPostsThisWeek: increment(1),
+          totalForumPosts:    increment(1),
           lastPostDate:       serverTimestamp(),
           daysSinceLastPost:  0,
           updatedAt:          serverTimestamp(),
@@ -87,6 +117,8 @@ export default function ForumPage() {
       setNewTitle('')
       setNewBody('')
       setNewFile(null)
+      setNewModule('')
+      setNewBatch('')
       setShowForm(false)
       toast.success('Thread posted! +5 pts')
     } catch (err) {
@@ -110,6 +142,7 @@ export default function ForumPage() {
         body:        replyBody.trim(),
         authorId:    user.uid,
         authorEmail: user.email,
+        authorName:  profile?.displayName || user.email,
         role,
         fileUrl:     attachment.fileUrl     || null,
         fileName:    attachment.fileName    || null,
@@ -120,9 +153,10 @@ export default function ForumPage() {
         replyCount: increment(1),
       })
       await updateDoc(doc(db, 'users', user.uid), { points: increment(3) })
-      if (role === 'student') {
+            if (role === 'student') {
         await updateDoc(doc(db, 'userBehaviour', user.uid), {
           forumPostsThisWeek: increment(1),
+          totalForumPosts:    increment(1),
           daysSinceLastPost:  0,
           updatedAt:          serverTimestamp(),
         })
@@ -138,9 +172,11 @@ export default function ForumPage() {
     }
   }
 
+  const displayNameOf = (item) => item.authorName || item.authorEmail?.split('@')[0]
+
   return (
     <PageLayout>
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-6xl">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="font-display text-3xl font-700 text-slate-900">Discussion Forum</h1>
@@ -169,6 +205,24 @@ export default function ForumPage() {
                 value={newBody}
                 onChange={e => setNewBody(e.target.value)}
               />
+              {(role === 'lecturer' || role === 'admin') && (
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="label">Batch <span className="text-slate-400 font-normal">(blank = everyone)</span></label>
+                    <select className="input text-sm" value={newBatch} onChange={e => { setNewBatch(e.target.value); setNewModule('') }}>
+                      <option value="">— Everyone —</option>
+                      {batches.map(b => <option key={b.id} value={b.name}>{b.name}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="label">Module <span className="text-slate-400 font-normal">(optional)</span></label>
+                    <select className="input text-sm" value={newModule} onChange={e => setNewModule(e.target.value)}>
+                      <option value="">— Everyone —</option>
+                      {coursesForBatch(newBatch).map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                    </select>
+                  </div>
+                </div>
+              )}
               <div>
                 <label className="label">Attach a file (optional)</label>
                 <input type="file"
@@ -209,12 +263,14 @@ export default function ForumPage() {
                     {t.role}
                   </span>
                 </div>
-                <div className="flex items-center gap-3 text-xs text-slate-500">
-                  <span>{t.authorEmail?.split('@')[0]}</span>
+                <div className="flex items-center gap-2 text-xs text-slate-500 flex-wrap">
+                  <span>{displayNameOf(t)}</span>
                   <span>•</span>
                   <span>💬 {t.replyCount || 0}</span>
                   <span>•</span>
                   <span>{t.createdAt?.toDate ? formatDistanceToNow(t.createdAt.toDate(), { addSuffix: true }) : '—'}</span>
+                  {t.module && <span className="badge badge-blue">{t.module}</span>}
+                  {t.batch && <span className="badge badge-amber">{t.batch}</span>}
                 </div>
               </button>
             ))}
@@ -234,11 +290,13 @@ export default function ForumPage() {
                   ← Back to threads
                 </button>
                 <h2 className="font-display text-xl font-700 text-slate-900 mb-1">{selected.title}</h2>
-                <div className="flex items-center gap-2 mb-4 text-xs text-slate-500">
+                <div className="flex items-center gap-2 mb-4 text-xs text-slate-500 flex-wrap">
                   <span className={`badge ${roleBadge[selected.role] || 'badge-blue'}`}>{selected.role}</span>
-                  <span>{selected.authorEmail?.split('@')[0]}</span>
+                  <span>{displayNameOf(selected)}</span>
                   <span>•</span>
                   <span>{selected.createdAt?.toDate ? formatDistanceToNow(selected.createdAt.toDate(), { addSuffix: true }) : '—'}</span>
+                  {selected.module && <span className="badge badge-blue">{selected.module}</span>}
+                  {selected.batch && <span className="badge badge-amber">{selected.batch}</span>}
                 </div>
                 {selected.body && <p className="text-slate-600 text-sm mb-3 leading-relaxed">{selected.body}</p>}
                 {selected.fileUrl && (
@@ -254,11 +312,11 @@ export default function ForumPage() {
                     <div key={r.id} className="flex gap-3">
                       <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-600 flex-shrink-0 mt-0.5
                         ${roleAvatar[r.role] || roleAvatar.student}`}>
-                        {r.authorEmail?.[0]?.toUpperCase()}
+                        {displayNameOf(r)?.[0]?.toUpperCase()}
                       </div>
                       <div className="flex-1 bg-slate-100 rounded-xl p-3">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="text-xs font-medium text-slate-600">{r.authorEmail?.split('@')[0]}</span>
+                          <span className="text-xs font-medium text-slate-600">{displayNameOf(r)}</span>
                           <span className={`badge ${roleBadge[r.role] || 'badge-blue'}`}>{r.role}</span>
                           <span className="text-xs text-slate-500 ml-auto">
                             {r.createdAt?.toDate ? formatDistanceToNow(r.createdAt.toDate(), { addSuffix: true }) : '—'}

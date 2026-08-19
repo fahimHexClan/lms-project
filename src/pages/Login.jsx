@@ -3,6 +3,12 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import toast from 'react-hot-toast'
 
+const features = [
+  { icon: '📚', title: 'Centralised Content', text: 'Every lecture, slide, and resource in one library.' },
+  { icon: '⚡', title: 'Adaptive Engagement', text: 'BAGE learns your rhythm and keeps you moving forward.' },
+  { icon: '📊', title: 'Real Insight', text: 'Progress, grades, and analytics — always up to date.' },
+]
+
 export default function Login() {
   const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
@@ -10,7 +16,6 @@ export default function Login() {
   const { login, user, role }   = useAuth()
   const navigate                = useNavigate()
 
-  // Already logged in — redirect (runs as an effect, not during render)
   useEffect(() => {
     if (user && role) {
       const map = { student: '/student', lecturer: '/lecturer', admin: '/admin' }
@@ -23,7 +28,6 @@ export default function Login() {
     setLoading(true)
     try {
       await login(email, password)
-      // redirect handled by the useEffect above once role loads
     } catch (err) {
       toast.error('Invalid credentials. Please try again.')
     } finally {
@@ -32,29 +36,71 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4 sm:p-6">
-      {/* Background decoration */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-72 h-72 sm:w-96 sm:h-96 bg-primary-100/60 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-72 h-72 sm:w-96 sm:h-96 bg-accent-100/50 rounded-full blur-3xl" />
+    <div className="min-h-screen lg:flex bg-white">
+      {/* Left — brand panel (hidden on mobile) */}
+      <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-primary-950 via-primary-900 to-primary-800 overflow-hidden">
+        {/* Dot-grid pattern */}
+        <div className="absolute inset-0 opacity-[0.07]"
+          style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
+        {/* Glow accents */}
+        <div className="absolute -top-24 -right-24 w-96 h-96 bg-accent-500/20 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-primary-400/20 rounded-full blur-3xl" />
+
+        <div className="relative z-10 flex flex-col justify-between p-12 xl:p-16 w-full">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center backdrop-blur-sm">
+              <svg className="w-5 h-5 text-accent-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                  d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+              </svg>
+            </div>
+            <span className="font-display text-white font-700 text-xl">EduCore</span>
+          </div>
+
+          <div className="max-w-md">
+            <h1 className="font-display text-4xl xl:text-5xl font-700 text-white leading-tight mb-4">
+              Learning, <span className="text-accent-400">adapted</span> to you.
+            </h1>
+            <p className="text-primary-100/80 text-base mb-10 leading-relaxed">
+              A unified platform for content, assignments, collaboration, and a gamification engine that actually pays attention.
+            </p>
+
+            <div className="space-y-5">
+              {features.map(f => (
+                <div key={f.title} className="flex items-start gap-3.5">
+                  <div className="w-9 h-9 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center text-lg flex-shrink-0">
+                    {f.icon}
+                  </div>
+                  <div>
+                    <p className="text-white font-600 text-sm">{f.title}</p>
+                    <p className="text-primary-200/70 text-xs mt-0.5">{f.text}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <p className="text-primary-300/50 text-xs">Next-Generation Learning Platform</p>
+        </div>
       </div>
 
-      <div className="w-full max-w-md animate-slide-up relative">
-        {/* Logo / Brand */}
-        <div className="text-center mb-8 sm:mb-10">
-          <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-primary-600 shadow-card mb-4">
-            <svg className="w-7 h-7 sm:w-8 sm:h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-                d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
-            </svg>
+      {/* Right — sign-in form */}
+      <div className="flex-1 flex items-center justify-center p-6 sm:p-10">
+        <div className="w-full max-w-sm animate-slide-up">
+          {/* Mobile-only brand header */}
+          <div className="lg:hidden text-center mb-8">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary-600 shadow-card mb-4">
+              <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                  d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+              </svg>
+            </div>
+            <h1 className="font-display text-2xl font-700 text-slate-900">EduCore LMS</h1>
+            <p className="text-slate-500 mt-1 text-sm">Next-Generation Learning Platform</p>
           </div>
-          <h1 className="font-display text-2xl sm:text-3xl font-700 text-slate-900">EduCore LMS</h1>
-          <p className="text-slate-500 mt-1 text-sm">Next-Generation Learning Platform</p>
-        </div>
 
-        {/* Card */}
-        <div className="card border-slate-200">
-          <h2 className="text-lg font-600 text-slate-900 mb-6">Sign in to your account</h2>
+          <h2 className="font-display text-2xl font-700 text-slate-900 mb-1">Welcome back</h2>
+          <p className="text-slate-500 text-sm mb-8">Sign in to continue to your dashboard.</p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -83,7 +129,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="btn-primary w-full mt-2 flex items-center justify-center gap-2"
+              className="btn-primary w-full mt-2 flex items-center justify-center gap-2 shadow-glow"
             >
               {loading ? (
                 <>
@@ -102,13 +148,12 @@ export default function Login() {
               New accounts are created by your administrator.
             </p>
           </div>
-        </div>
 
-        {/* Demo hint */}
-        <div className="mt-4 card-sm border-slate-200 text-center">
-          <p className="text-xs text-slate-500">
-            Demo roles — Admin creates Student &amp; Lecturer accounts from the Admin panel.
-          </p>
+          <div className="mt-4 card-sm border-slate-200 text-center">
+            <p className="text-xs text-slate-500">
+              Demo roles — Admin creates Student &amp; Lecturer accounts from the Admin panel.
+            </p>
+          </div>
         </div>
       </div>
     </div>

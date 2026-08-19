@@ -156,7 +156,7 @@ export default function AdminAnalytics() {
 
   return (
     <PageLayout>
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-6xl">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="font-display text-3xl font-700 text-slate-900">MIS Analytics</h1>

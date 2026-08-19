@@ -3,16 +3,19 @@ import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, delete
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage'
 import { db, storage } from '../../services/firebase'
 import { useAuth } from '../../context/AuthContext'
+import { useLookups } from '../../hooks/useLookups'
 import { PageLayout } from '../../components/common/Sidebar'
 import toast from 'react-hot-toast'
 
 export default function LecturerContent() {
   const { user } = useAuth()
+  const { batches, coursesForBatch } = useLookups()
   const [materials, setMaterials] = useState([])
   const [uploading, setUploading] = useState(false)
-  const [form, setForm] = useState({ title: '', module: '', description: '' })
+  const [form, setForm] = useState({ title: '', module: '', batch: '', description: '' })
   const [file, setFile] = useState(null)
   const [showForm, setShowForm] = useState(false)
+  const [groupFilter, setGroupFilter] = useState('all')
 
   useEffect(() => {
     const q = query(collection(db, 'materials'), orderBy('uploadedAt', 'desc'))
@@ -31,6 +34,7 @@ export default function LecturerContent() {
       await addDoc(collection(db, 'materials'), {
         title:        form.title.trim(),
         module:       form.module.trim(),
+        batch:        form.batch.trim(),
         description:  form.description.trim(),
         fileUrl:      url,
         storagePath:  path,
@@ -40,7 +44,7 @@ export default function LecturerContent() {
         uploadedBy:   user.uid,
         uploadedAt:   serverTimestamp(),
       })
-      setForm({ title: '', module: '', description: '' })
+      setForm({ title: '', module: '', batch: '', description: '' })
       setFile(null)
       setShowForm(false)
       toast.success('Material uploaded successfully!')
@@ -63,9 +67,13 @@ export default function LecturerContent() {
     }
   }
 
+  const groupKey = (m) => `${m.batch || 'All Batches'} · ${m.module || 'All Courses'}`
+  const groupKeys = ['all', ...new Set(materials.map(groupKey))]
+  const visibleMaterials = groupFilter === 'all' ? materials : materials.filter(m => groupKey(m) === groupFilter)
+
   return (
     <PageLayout>
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-5xl">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="font-display text-3xl font-700 text-slate-900">Content Library</h1>
@@ -87,9 +95,20 @@ export default function LecturerContent() {
                   value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} required />
               </div>
               <div>
+                <label className="label">Batch <span className="text-slate-400 font-normal">(blank = visible to everyone)</span></label>
+                <select className="input" value={form.batch}
+                  onChange={e => setForm(f => ({ ...f, batch: e.target.value, module: '' }))}>
+                  <option value="">— Everyone —</option>
+                  {batches.map(b => <option key={b.id} value={b.name}>{b.name}</option>)}
+                </select>
+              </div>
+              <div>
                 <label className="label">Module</label>
-                <input className="input" placeholder="e.g. COM6301"
-                  value={form.module} onChange={e => setForm(f => ({ ...f, module: e.target.value }))} />
+                <select className="input" value={form.module}
+                  onChange={e => setForm(f => ({ ...f, module: e.target.value }))}>
+                  <option value="">— Everyone —</option>
+                  {coursesForBatch(form.batch).map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                </select>
               </div>
             </div>
             <div className="mb-4">
@@ -113,16 +132,24 @@ export default function LecturerContent() {
           </form>
         )}
 
+        {/* Batch + Course group filter */}
+        <div className="flex items-center gap-2 mb-4">
+          <label className="text-sm text-slate-500">View:</label>
+          <select className="input w-auto text-sm" value={groupFilter} onChange={e => setGroupFilter(e.target.value)}>
+            {groupKeys.map(k => <option key={k} value={k}>{k === 'all' ? 'All batches & courses' : k}</option>)}
+          </select>
+        </div>
+
         {/* Materials list */}
         <div className="space-y-3">
-          {materials.map(m => (
+          {visibleMaterials.map(m => (
             <div key={m.id} className="card flex items-center gap-4 hover:border-slate-300 transition-colors">
               <div className="w-10 h-10 rounded-xl bg-primary-50 border border-primary-200 flex items-center justify-center flex-shrink-0">
                 <span className="text-xl">{m.fileType?.includes('pdf') ? '📄' : '📊'}</span>
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-slate-700">{m.title}</p>
-                <p className="text-xs text-slate-500 mt-0.5">{m.module} • {m.fileName} • {(m.fileSize / 1024).toFixed(0)} KB</p>
+                <p className="text-xs text-slate-500 mt-0.5">{m.module}{m.batch ? ` • ${m.batch}` : ''} • {m.fileName} • {(m.fileSize / 1024).toFixed(0)} KB</p>
                 {m.description && <p className="text-xs text-slate-500 mt-0.5 truncate">{m.description}</p>}
               </div>
               <span className="text-xs text-slate-500 flex-shrink-0">
@@ -134,7 +161,7 @@ export default function LecturerContent() {
               </div>
             </div>
           ))}
-          {materials.length === 0 && (
+          {visibleMaterials.length === 0 && (
             <div className="text-center py-20 text-slate-500">
               <p className="text-4xl mb-3">📂</p>
               <p>No materials uploaded yet</p>

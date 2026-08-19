@@ -2,7 +2,7 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ── Helper functions ────────────────────────────────────────────────────
+    // -- Helper functions --------------------------------------------------
     function isSignedIn() {
       return request.auth != null;
     }
@@ -17,81 +17,75 @@ service cloud.firestore {
     function isAdmin()    { return getUserRole() == 'admin'; }
     function isStaff()    { return getUserRole() in ['lecturer', 'admin']; }
 
-    // ── Users collection ───────────────────────────────────────────────────
+    // -- Users collection ----------------------------------------------------
     match /users/{userId} {
-      // Anyone signed in can read (needed for leaderboard, forum author display)
       allow read: if isSignedIn();
-      // Users update their own doc; admins can update any
       allow update: if isOwner(userId) || isAdmin();
-      // Only admin creates (via register function)
       allow create: if isSignedIn();
       allow delete: if isAdmin();
     }
 
-    // ── User behaviour docs (BAGE source of truth) ─────────────────────────
+    // -- User behaviour docs (BAGE source of truth) ---------------------------
     match /userBehaviour/{userId} {
-      // Student reads their own; admin reads all
       allow read: if isOwner(userId) || isAdmin();
-      // Client writes allowed (for submission/forum updates from frontend)
       allow write: if isOwner(userId) || isAdmin();
     }
 
-    // ── Challenges (written by BAGE Cloud Function) ────────────────────────
+    // -- Challenges (written by BAGE Cloud Function) --------------------------
     match /challenges/{challengeId} {
-      // Student reads/completes their own; admin reads all
+      // Student reads/views their own; admin reads all
       allow read: if isSignedIn() && (
         resource.data.userId == request.auth.uid || isAdmin()
       );
-      // Only the owning student can mark complete (update status + completedAt)
-      allow update: if resource.data.userId == request.auth.uid;
-      // Cloud Functions create; frontend never creates directly
+      // Completion is decided SERVER-SIDE ONLY by the BAGE Cloud Function
+      // (which uses the Admin SDK and bypasses these rules entirely). No
+      // client — not even the owning student — can mark a challenge
+      // complete or change its reward directly; that would let a student
+      // self-award points/badges without doing the actual behaviour.
+      allow update: if isAdmin();
       allow create: if isAdmin();
       allow delete: if isAdmin();
     }
 
-    // ── Milestones ─────────────────────────────────────────────────────────
+    // -- Milestones ------------------------------------------------------------
     match /milestones/{milestoneId} {
       allow read: if isSignedIn();
       allow write: if isAdmin();
     }
 
-    // ── Materials (Content Library) ────────────────────────────────────────
+    // -- Materials (Content Library) --------------------------------------------
     match /materials/{materialId} {
       allow read: if isSignedIn();
       allow create, update, delete: if isStaff();
     }
 
-    // ── Assignments ────────────────────────────────────────────────────────
+    // -- Assignments ---------------------------------------------------------
     match /assignments/{assignmentId} {
       allow read: if isSignedIn();
       allow create, update, delete: if isStaff();
     }
 
-    // ── Submissions ────────────────────────────────────────────────────────
+    // -- Submissions -----------------------------------------------------------
     match /submissions/{submissionId} {
-      // Student reads own; lecturer/admin reads all
       allow read: if isSignedIn() && (
         resource.data.studentId == request.auth.uid || isStaff()
       );
-      // Students create their own submissions
       allow create: if isStudent() && request.resource.data.studentId == request.auth.uid;
-      // Lecturers/admins can update (to grade); students cannot update after submission
       allow update: if isStaff();
       allow delete: if isAdmin();
     }
 
-    // ── Forum Threads ──────────────────────────────────────────────────────
+    // -- Forum Threads ---------------------------------------------------------
     match /forumThreads/{threadId} {
       allow read: if isSignedIn();
       allow create: if isSignedIn();
-      // Author or staff can update (e.g. increment replyCount, pin)
-      allow update: if isSignedIn() && (
-        resource.data.authorId == request.auth.uid || isStaff()
-      );
+      // Any signed-in user can update (needed so repliers can increment
+      // replyCount on threads they didn't author — forum collaboration)
+      allow update: if isSignedIn();
       allow delete: if isStaff();
     }
 
-    // ── Forum Replies ──────────────────────────────────────────────────────
+    // -- Forum Replies ---------------------------------------------------------
     match /forumReplies/{replyId} {
       allow read: if isSignedIn();
       allow create: if isSignedIn();
@@ -99,19 +93,40 @@ service cloud.firestore {
       allow delete: if isStaff();
     }
 
-    // ── Events (Calendar) ─────────────────────────────────────────────────
+    // -- Events (Calendar) -------------------------------------------------------
     match /events/{eventId} {
       allow read: if isSignedIn();
       allow create, update, delete: if isStaff();
     }
 
-    // ── Analytics / Reports (admin only) ──────────────────────────────────
+    // -- Analytics / Reports (admin only) ----------------------------------------
     match /weeklyReports/{reportId} {
       allow read: if isAdmin();
-      allow write: if false; // Cloud Functions only
+      allow write: if false;
     }
 
-    // ── Badges collection (optional audit log) ─────────────────────────────
+    // -- Batches & Courses (admin-managed lookup lists) --------------------------
+    match /batches/{batchId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+    match /courses/{courseId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+    // -- Offerings: which courses a batch actually runs (Batch <-> Course pairs) --
+    match /offerings/{offeringId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // -- Video Lectures (YouTube links) -----------------------------------------
+    match /videos/{videoId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isStaff();
+    }
+
+    // -- Badges collection (optional audit log) ----------------------------------
     match /badges/{badgeId} {
       allow read: if isSignedIn();
       allow write: if isAdmin();

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { collection, query, where, orderBy, limit, onSnapshot } from 'firebase/firestore'
+import { collection, query, where, orderBy, onSnapshot, doc } from 'firebase/firestore'
 import { db } from '../../services/firebase'
 import { useAuth } from '../../context/AuthContext'
 
@@ -7,27 +7,49 @@ const medals = ['🥇', '🥈', '🥉']
 
 export default function Leaderboard({ maxRows = 10 }) {
   const { user } = useAuth()
-  const [leaders, setLeaders] = useState([])
+  const [profile, setProfile] = useState(null)
+  const [allStudents, setAllStudents] = useState([])
+
+  useEffect(() => {
+    if (!user) return
+    return onSnapshot(doc(db, 'users', user.uid), s => s.exists() && setProfile(s.data()))
+  }, [user])
 
   useEffect(() => {
     const q = query(
       collection(db, 'users'),
       where('role', '==', 'student'),
-      orderBy('points', 'desc'),
-      limit(maxRows)
+      orderBy('points', 'desc')
     )
     const unsub = onSnapshot(q, snap => {
-      setLeaders(snap.docs.map((d, i) => ({ id: d.id, rank: i + 1, ...d.data() })))
+      setAllStudents(snap.docs.map(d => ({ id: d.id, ...d.data() })))
+    }, (err) => {
+      console.error('Leaderboard query failed (likely a missing Firestore index):', err)
     })
     return unsub
-  }, [maxRows])
+  }, [])
+
+  // Scope the leaderboard to the viewer's own batch + course, so they're
+  // only compared against direct peers. Students with no batch/module set
+  // fall back to the full, ungrouped leaderboard.
+  const scoped = (profile?.batch || profile?.module)
+    ? allStudents.filter(s => s.batch === profile?.batch && s.module === profile?.module)
+    : allStudents
+
+  const leaders = scoped.slice(0, maxRows).map((s, i) => ({ ...s, rank: i + 1 }))
+  const isScoped = !!(profile?.batch || profile?.module)
 
   return (
     <div className="card">
-      <div className="flex items-center gap-2 mb-4">
+      <div className="flex items-center gap-2 mb-1">
         <span className="text-lg">🏆</span>
         <h3 className="font-display text-slate-900 font-700">Leaderboard</h3>
       </div>
+      {isScoped && (
+        <p className="text-xs text-slate-500 mb-3">
+          {profile.batch || 'All'} · {profile.module || 'All'}
+        </p>
+      )}
       <div className="space-y-2">
         {leaders.map((l) => (
           <div

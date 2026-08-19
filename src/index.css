@@ -30,14 +30,14 @@
 
 @layer components {
   .card {
-    @apply bg-white border border-slate-200 rounded-2xl p-6 shadow-card;
+    @apply bg-white border border-slate-200 rounded-2xl p-6 shadow-card transition-shadow duration-300 hover:shadow-card-hover;
   }
   .card-sm {
-    @apply bg-white border border-slate-200 rounded-xl p-4 shadow-card;
+    @apply bg-white border border-slate-200 rounded-xl p-4 shadow-card transition-shadow duration-300 hover:shadow-card-hover;
   }
   .btn-primary {
     @apply bg-primary-600 hover:bg-primary-700 text-white font-medium px-5 py-2.5 rounded-xl
-           shadow-sm transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+           shadow-glow transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
   }
   .btn-secondary {
     @apply bg-white hover:bg-slate-50 text-slate-700 font-medium px-5 py-2.5 rounded-xl
@@ -77,10 +77,10 @@
     @apply font-display text-xl font-700 text-slate-900 mb-1;
   }
   .nav-link {
-    @apply flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-all duration-200 text-sm font-medium;
+    @apply flex items-center gap-3 px-4 py-2.5 rounded-xl text-primary-200/70 hover:text-white hover:bg-white/10 transition-all duration-200 text-sm font-medium;
   }
   .nav-link.active {
-    @apply bg-primary-50 text-primary-700 border border-primary-200;
+    @apply bg-white/10 text-white border border-white/10;
   }
 }
 
@@ -96,4 +96,30 @@
   }
   .animate-fade-in { animation: fadeIn 0.4s ease-out; }
   .animate-slide-up { animation: slideUp 0.4s ease-out; }
+
+  /* Subtle page background wash — used on the main authenticated app
+     surface (PageLayout), in place of flat slate-50. Kept deliberately
+     restrained: one soft navy tint top-left, nothing competing with it. */
+  .app-bg {
+    background-color: #f8fafc;
+    background-image: linear-gradient(180deg, rgb(37 99 235 / 0.05) 0%, transparent 320px);
+  }
+}
+
+@layer components {
+  /* Colored circular icon badge — used in stat cards for visual richness */
+  .icon-badge {
+    @apply w-11 h-11 rounded-xl flex items-center justify-center text-xl flex-shrink-0;
+  }
+  .icon-badge-primary { @apply icon-badge bg-primary-50 text-primary-700; }
+  .icon-badge-accent  { @apply icon-badge bg-accent-50 text-accent-700; }
+  .icon-badge-green   { @apply icon-badge bg-emerald-50 text-emerald-700; }
+  .icon-badge-sky     { @apply icon-badge bg-sky-50 text-sky-700; }
+  .icon-badge-red     { @apply icon-badge bg-red-50 text-red-600; }
+  .icon-badge-purple  { @apply icon-badge bg-purple-50 text-purple-700; }
+
+  /* Stat tile — icon badge + label + value, consistent across all dashboards */
+  .stat-tile {
+    @apply card-sm flex items-center gap-3;
+  }
 }
