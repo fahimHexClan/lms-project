@@ -13,6 +13,8 @@ import StudentForum      from './pages/student/Forum'
 import StudentCalendar   from './pages/student/Calendar'
 import StudentGamification from './pages/student/Gamification'
 import StudentVideos     from './pages/student/Videos'
+import StudentExams from './pages/student/Exams'
+
 
 // Lecturer pages
 import LecturerDashboard  from './pages/lecturer/Dashboard'
@@ -21,6 +23,8 @@ import LecturerAssignments from './pages/lecturer/Assignments'
 import LecturerForum      from './pages/lecturer/Forum'
 import LecturerCalendar   from './pages/lecturer/Calendar'
 import LecturerVideos     from './pages/lecturer/Videos'
+import LecturerExams from './pages/lecturer/Exams'
+
 
 // Admin pages
 import AdminDashboard from './pages/admin/Dashboard'
@@ -30,6 +34,7 @@ import AdminCalendar  from './pages/admin/Calendar'
 import AdminForum     from './pages/admin/Forum'
 import AdminVideos    from './pages/admin/Videos'
 import AdminAssignments from './pages/admin/Assignments'
+import AdminExams from './pages/admin/Exams'
 
 function StudentLayout({ children }) {
   return (
@@ -68,6 +73,8 @@ export default function App() {
           <Route path="/student/forum"      element={<StudentLayout><StudentForum /></StudentLayout>} />
           <Route path="/student/calendar"   element={<StudentLayout><StudentCalendar /></StudentLayout>} />
           <Route path="/student/gamification" element={<StudentLayout><StudentGamification /></StudentLayout>} />
+          <Route path="/student/exams" element={<StudentLayout><StudentExams /></StudentLayout>} />
+
 
           {/* Lecturer routes */}
           <Route path="/lecturer"             element={<LecturerLayout><LecturerDashboard /></LecturerLayout>} />
@@ -76,6 +83,8 @@ export default function App() {
           <Route path="/lecturer/assignments" element={<LecturerLayout><LecturerAssignments /></LecturerLayout>} />
           <Route path="/lecturer/forum"       element={<LecturerLayout><LecturerForum /></LecturerLayout>} />
           <Route path="/lecturer/calendar"    element={<LecturerLayout><LecturerCalendar /></LecturerLayout>} />
+          <Route path="/lecturer/exams" element={<LecturerLayout><LecturerExams /></LecturerLayout>} />
+
 
           {/* Admin routes */}
           <Route path="/admin"           element={<AdminLayout><AdminDashboard /></AdminLayout>} />
@@ -85,6 +94,7 @@ export default function App() {
           <Route path="/admin/forum"     element={<AdminLayout><AdminForum /></AdminLayout>} />
           <Route path="/admin/calendar"  element={<AdminLayout><AdminCalendar /></AdminLayout>} />
           <Route path="/admin/assignments" element={<AdminLayout><AdminAssignments /></AdminLayout>} />
+          <Route path="/admin/exams" element={<AdminLayout><AdminExams /></AdminLayout>} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

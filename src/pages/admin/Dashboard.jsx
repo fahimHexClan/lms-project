@@ -3,6 +3,7 @@ import { collection, getDocs, where, query } from 'firebase/firestore'
 import { db } from '../../services/firebase'
 import { PageLayout } from '../../components/common/Sidebar'
 import GroupedLeaderboards from '../../components/bage/GroupedLeaderboards'
+import GroupedMarksLeaderboards from '../../components/bage/GroupedMarksLeaderboards'
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -106,8 +107,12 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <div className="mt-6">
+            <div className="mt-6">
           <GroupedLeaderboards maxPerGroup={5} />
+        </div>
+
+        <div className="mt-6">
+          <GroupedMarksLeaderboards maxPerGroup={5} />
         </div>
       </div>
     </PageLayout>

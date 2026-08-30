@@ -13,6 +13,8 @@ const navConfigs = {
     { to: '/student/forum',        label: 'Forum',        icon: ChatIcon },
     { to: '/student/calendar',     label: 'Calendar',     icon: CalendarIcon },
     { to: '/student/gamification', label: 'Achievements', icon: TrophyIcon },
+    { to: '/student/exams', label: 'Exams', icon: ClipboardIcon },
+
   ],
   lecturer: [
     { to: '/lecturer',             label: 'Dashboard',    icon: HomeIcon },
@@ -21,6 +23,8 @@ const navConfigs = {
     { to: '/lecturer/assignments', label: 'Assignments',  icon: ClipboardIcon },
     { to: '/lecturer/forum',       label: 'Forum',        icon: ChatIcon },
     { to: '/lecturer/calendar',    label: 'Calendar',     icon: CalendarIcon },
+    { to: '/lecturer/exams', label: 'Exams', icon: ClipboardIcon },
+
   ],
   admin: [
     { to: '/admin',           label: 'Dashboard',  icon: HomeIcon },
@@ -30,6 +34,7 @@ const navConfigs = {
     { to: '/admin/assignments', label: 'Assignments', icon: ClipboardIcon },
     { to: '/admin/forum',     label: 'Forum',      icon: ChatIcon },
     { to: '/admin/calendar',  label: 'Calendar',   icon: CalendarIcon },
+    { to: '/admin/exams', label: 'Exams', icon: ClipboardIcon },
   ],
 }
 

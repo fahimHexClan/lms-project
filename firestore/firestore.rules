@@ -125,6 +125,18 @@ service cloud.firestore {
       allow read: if isSignedIn();
       allow create, update, delete: if isStaff();
     }
+    // -- Exams (Online Exam marks entry) -----------------------------------------
+    match /exams/{examId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isStaff();
+    }
+    match /examResults/{resultId} {
+      // Student reads only their own result; staff reads/writes all
+      allow read: if isSignedIn() && (
+        resource.data.studentId == request.auth.uid || isStaff()
+      );
+      allow create, update, delete: if isStaff();
+    }
 
     // -- Badges collection (optional audit log) ----------------------------------
     match /badges/{badgeId} {

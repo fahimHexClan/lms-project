@@ -3,6 +3,7 @@ import { collection, query, getDocs, where } from 'firebase/firestore'
 import { db } from '../../services/firebase'
 import { PageLayout } from '../../components/common/Sidebar'
 import GroupedLeaderboards from '../../components/bage/GroupedLeaderboards'
+import GroupedMarksLeaderboards from '../../components/bage/GroupedMarksLeaderboards'
 
 export default function LecturerDashboard() {
   const [stats, setStats] = useState({ students: 0, assignments: 0, submissions: 0, ungraded: 0 })
@@ -143,8 +144,11 @@ export default function LecturerDashboard() {
             </div>
           )}
         </div>
+  <GroupedLeaderboards maxPerGroup={5} />
 
-        <GroupedLeaderboards maxPerGroup={5} />
+        <div className="mt-6">
+          <GroupedMarksLeaderboards maxPerGroup={5} />
+        </div>
       </div>
     </PageLayout>
   )
